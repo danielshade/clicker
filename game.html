@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Полювання на Акул</title>
+    <style>
+        /* ЗМІНЕНО: Імпорт нового шрифту */
+        @import url('https://fonts.googleapis.com/css2?family=Creepster&display=swap');
+
+        body {
+            /* ЗМІНЕНО: Новий шрифт та фон */
+            font-family: 'Creepster', cursive;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-image: url('background.jpg'); /* Новий фон */
+            background-size: cover;
+            background-position: center;
+            color: #ff4848; /* Червонуватий колір тексту */
+            overflow: hidden;
+        }
+
+        #gameContainer {
+            width: 90vw;
+            height: 80vh;
+            max-width: 1000px;
+            max-height: 700px;
+            border: 5px solid #0a203e;
+            background-color: rgba(0, 0, 0, 0.4); /* Напівпрозорий фон, щоб було видно шпалери */
+            position: relative;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+            cursor: crosshair;
+        }
+
+        .target {
+            position: absolute;
+            width: 100px; /* Трохи більші акули */
+            height: 100px;
+            transition: transform 0.1s;
+            -webkit-user-drag: none;
+            user-select: none;
+        }
+
+        .target:hover {
+            transform: scale(1.1);
+        }
+
+        #uiContainer {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 36px; /* Більший шрифт для UI */
+            text-shadow: 2px 2px 5px #000;
+        }
+
+        .messageScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 100;
+        }
+
+        .messageScreen h1 {
+            font-size: 68px;
+            color: #ff4848;
+        }
+        
+        .messageScreen p {
+            font-size: 28px;
+            color: #fff;
+        }
+
+        .messageScreen button {
+            font-family: 'Creepster', cursive;
+            font-size: 32px;
+            padding: 20px 40px;
+            cursor: pointer;
+            background-color: #a01c1c;
+            color: white;
+            border: 3px solid #ff4848;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="gameContainer">
+        <div id="uiContainer">
+            <div id="levelDisplay">Рівень: 1</div>
+            <div id="hitsDisplay">Влучання: 0 / 1</div>
+            <div id="timerDisplay">Час: 120</div>
+        </div>
+        
+        <div id="startScreen" class="messageScreen">
+            <h1>Полювання на Акул</h1>
+            <p>Вполюй усіх акул, доки не скінчився час!</p>
+            <button id="startButton">ПОЧАТИ</button>
+        </div>
+        
+        <div id="gameOverScreen" class="messageScreen hidden">
+            <h1 id="gameOverTitle">ГРУ ЗАВЕРШЕНО</h1>
+            <p id="gameOverMessage">Час вийшов!</p>
+            <button id="restartButton">СПРОБУВАТИ ЗНОВУ</button>
+        </div>
+    </div>
+
+    <script>
+        const gameContainer = document.getElementById('gameContainer');
+        const levelDisplay = document.getElementById('levelDisplay');
+        const hitsDisplay = document.getElementById('hitsDisplay');
+        const timerDisplay = document.getElementById('timerDisplay');
+        
+        const startScreen = document.getElementById('startScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const startButton = document.getElementById('startButton');
+        const restartButton = document.getElementById('restartButton');
+        const gameOverMessage = document.getElementById('gameOverMessage');
+
+        let currentLevel = 1;
+        let hitsThisLevel = 0;
+        let targetsForLevel = 0;
+        let timeLeft = 120;
+        let timerInterval;
+
+        // НОВЕ: Змінні для анімації
+        let activeTargets = [];
+        let animationFrameId;
+
+        startButton.addEventListener('click', startGame);
+        restartButton.addEventListener('click', startGame);
+
+        function startGame() {
+            startScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            currentLevel = 1;
+            startLevel();
+            // НОВЕ: Запускаємо анімацію
+            gameLoop();
+        }
+
+        function startLevel() {
+            clearInterval(timerInterval);
+            activeTargets.forEach(t => t.element.remove());
+            activeTargets = [];
+            
+            hitsThisLevel = 0;
+            targetsForLevel = 1 + (currentLevel - 1) * 3;
+            timeLeft = 120;
+
+            updateUI();
+            
+            for (let i = 0; i < targetsForLevel; i++) {
+                createTarget();
+            }
+
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+        
+        function createTarget() {
+            const element = document.createElement('img');
+            element.src = 'shark_target.png';
+            element.className = 'target';
+            
+            // НОВЕ: Логіка для руху
+            const direction = Math.random() < 0.5 ? 1 : -1; // 1 = праворуч, -1 = ліворуч
+            const speed = 1 + Math.random() * 2; // Випадкова швидкість
+            const startX = direction === 1 ? -100 : gameContainer.clientWidth; // Початкова позиція за екраном
+            const startY = Math.random() * (gameContainer.clientHeight - 100);
+
+            element.style.top = `${startY}px`;
+            element.style.left = `${startX}px`;
+            if (direction === -1) {
+                element.style.transform = 'scaleX(-1)'; // Розвертаємо акулу, якщо вона пливе ліворуч
+            }
+
+            const targetObject = { element, x: startX, y: startY, speed, direction };
+            activeTargets.push(targetObject);
+            
+            element.addEventListener('click', () => {
+                hitsThisLevel++;
+                element.remove();
+                // Видаляємо акулу з масиву активних цілей
+                activeTargets = activeTargets.filter(t => t !== targetObject);
+                updateUI();
+                
+                if (hitsThisLevel === targetsForLevel) {
+                    currentLevel++;
+                    // Затримка перед новим рівнем
+                    setTimeout(startLevel, 500);
+                }
+            });
+            
+            gameContainer.appendChild(element);
+        }
+
+        // НОВЕ: Головний цикл анімації
+        function gameLoop() {
+            for (let i = activeTargets.length - 1; i >= 0; i--) {
+                const target = activeTargets[i];
+                
+                // Рухаємо акулу
+                target.x += target.speed * target.direction;
+                target.element.style.left = `${target.x}px`;
+
+                // Видаляємо акулу, якщо вона виплила за межі екрану
+                if (target.x > gameContainer.clientWidth || target.x < -100) {
+                    target.element.remove();
+                    activeTargets.splice(i, 1);
+                }
+            }
+            // Продовжуємо анімацію
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+        
+        function updateTimer() {
+            timeLeft--;
+            updateUI();
+            
+            if (timeLeft <= 0) {
+                endGame("Час вийшов!");
+            }
+        }
+
+        function updateUI() {
+            levelDisplay.textContent = `Рівень: ${currentLevel}`;
+            hitsDisplay.textContent = `Влучання: ${hitsThisLevel} / ${targetsForLevel}`;
+            timerDisplay.textContent = `Час: ${timeLeft}`;
+        }
+        
+        function endGame(message) {
+            clearInterval(timerInterval);
+            // НОВЕ: Зупиняємо анімацію
+            cancelAnimationFrame(animationFrameId);
+            gameOverMessage.textContent = message + ` Ви досягли ${currentLevel} рівня.`;
+            gameOverScreen.classList.remove('hidden');
+        }
+
+    </script>
+</body>
+</html>
