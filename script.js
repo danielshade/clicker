@@ -17,21 +17,9 @@ const GOAL_SCORE = 50;
 const sharkTypes = ['assets/shark_1.png', 'assets/shark_2.png', 'assets/shark_3.png'];
 const megalodonHp = { easy: 38, normal: 50, jaws: 100 };
 
-let gameState = {
-    currentLevel: 0, score: 0, timeLeft: 120, playerHealth: 10,
-    currentLang: 'uk', currentDifficulty: 'easy',
-    isPaused: false, bossOnScreen: false,
-    animationFrameId: null,
-    intervals: [],
-    activeTargets: []
-};
+let gameState = { currentLevel: 0, score: 0, timeLeft: 120, playerHealth: 10, currentLang: 'uk', currentDifficulty: 'easy', isPaused: false, bossOnScreen: false, animationFrameId: null, intervals: [], activeTargets: [] };
+let playerData = { pearls: 0, megalodonDefeatedOn: null };
 
-let playerData = {
-    pearls: 0,
-    megalodonDefeatedOn: null
-};
-
-// --- DOM ЕЛЕМЕНТИ ---
 const gameContainer = document.getElementById('gameContainer');
 const mainMenuScreen = document.getElementById('mainMenuScreen');
 const setupScreen = document.getElementById('setupScreen');
@@ -47,22 +35,21 @@ const notificationText = document.getElementById('notification-text');
 const pearlDisplay = document.getElementById('pearl-display');
 const buyLifeButton = document.getElementById('buyLifeButton');
 
-// --- ЗБЕРЕЖЕННЯ ДАНИХ ---
 function savePlayerData() { localStorage.setItem('wateryAgonyData', JSON.stringify(playerData)); }
 function loadPlayerData() { const data = localStorage.getItem('wateryAgonyData'); if (data) playerData = JSON.parse(data); }
 
-// --- ІНІЦІАЛІЗАЦІЯ ГРИ ---
 document.addEventListener('DOMContentLoaded', () => {
     loadPlayerData();
     attachEventListeners();
     updateUIText();
+    showScreen('main'); // Починаємо з головного меню
 });
 
 function attachEventListeners() {
     document.getElementById('lang-selector').addEventListener('click', (e) => { if (e.target.tagName === 'BUTTON') { gameState.currentLang = e.target.dataset.lang; updateUIText(); document.getElementById('lang-selector').querySelector('.selected').classList.remove('selected'); e.target.classList.add('selected'); } });
     document.getElementById('startButton').addEventListener('click', () => showScreen('setup'));
     document.getElementById('mapButton').addEventListener('click', () => showScreen('map'));
-    document.getElementById('shopButton').addEventListener('click', openShop);
+    document.getElementById('mainMenuShopButton').addEventListener('click', openShop);
     document.getElementById('difficulty-selector').addEventListener('click', (e) => { if (e.target.tagName === 'BUTTON') { gameState.currentDifficulty = e.target.dataset.difficulty; document.getElementById('difficulty-selector').querySelector('.selected').classList.remove('selected'); e.target.classList.add('selected'); } });
     document.getElementById('playButton').addEventListener('click', startGame);
     document.getElementById('backToMainButton').addEventListener('click', () => showScreen('main'));
@@ -76,18 +63,24 @@ function attachEventListeners() {
     document.getElementById('shopBackButton').addEventListener('click', returnToMenu);
 }
 
-// --- УПРАВЛІННЯ ЕКРАНАМИ ---
+// --- ВИПРАВЛЕНО: Функція управління екранами ---
 function showScreen(screenName) {
+    // Ховаємо абсолютно всі екрани
     [mainMenuScreen, setupScreen, mapScreen, shopScreen, gameOverScreen, pauseScreen].forEach(s => s.classList.add('hidden'));
+    // І також примусово ховаємо всі ігрові елементи
+    uiContainer.classList.add('hidden');
+    inGameControls.classList.add('hidden');
+    playerHealthDisplay.classList.add('hidden');
+
+    // Показуємо лише потрібний екран
     const screenMap = { main: mainMenuScreen, setup: setupScreen, map: mapScreen, shop: shopScreen };
     if (screenMap[screenName]) screenMap[screenName].classList.remove('hidden');
 }
 
-// --- ЛОГІКА ОНОВЛЕННЯ UI ---
 function updateUIText() {
     const T = translations[gameState.currentLang];
     const DOMElements = {
-        'gameTitle': T.gameTitle, 'startButton': T.startButton, 'mapButton': T.map, 'shopButton': T.shop,
+        'gameTitle': T.gameTitle, 'startButton': T.startButton, 'mapButton': T.map, 'mainMenuShopButton': T.shop,
         'setupDiffLabel': T.diffLabel, 'diffBtnEasy': T.diffEasy, 'diffBtnNormal': T.diffNormal, 'diffBtnJaws': T.diffJaws, 'playButton': T.play, 'backToMainButton': T.back,
         'mapTitle': T.map, 'map1Title': T.map1, 'map2Title': T.map2, 'map2Locked': T.map2Locked, 'mapBackButton': T.back, 'playMap1Button': T.play,
         'pauseButton': T.pause, 'resumeButton': T.resume, 'returnToMenuButton': T.mainMenu, 'pauseTitle': T.pauseTitle, 'stanley-dialogue': T.stanleyDialogue,
@@ -107,7 +100,6 @@ function updateGameUI() {
     timerDisplay.textContent = `${T.time}: ${gameState.timeLeft}`;
 }
 
-// --- ОСНОВНА ІГРОВА ЛОГІКА ---
 function startGame() {
     showScreen('none');
     uiContainer.classList.remove('hidden'); inGameControls.classList.remove('hidden'); playerHealthDisplay.classList.remove('hidden');
@@ -151,28 +143,20 @@ function startFinalBossLevel() {
 function createTarget(isMiniboss = false, isFinalBoss = false) {
     const element = document.createElement('img');
     const targetObject = { element, isMiniboss, isFinalBoss };
-    
     if (isFinalBoss) { element.src = 'assets/megalodon.png'; element.className = 'target finalboss'; targetObject.hp = megalodonHp[gameState.currentDifficulty]; targetObject.maxHp = megalodonHp[gameState.currentDifficulty]; targetObject.pattern = 'vertical'; }
     else if (isMiniboss) { element.src = 'assets/white_shark.png'; element.className = 'target miniboss'; targetObject.hp = 20; targetObject.maxHp = 20; targetObject.pattern = 'horizontal'; }
     else { element.src = sharkTypes[Math.floor(Math.random() * sharkTypes.length)]; element.className = 'target'; const movementPatterns = ['horizontal', 'diagonal', 'wavy']; targetObject.pattern = movementPatterns[Math.floor(Math.random() * movementPatterns.length)]; }
-    
     if (isMiniboss || isFinalBoss) { const healthBarContainer = document.createElement('div'); healthBarContainer.className = 'health-bar-container'; const healthBar = document.createElement('div'); healthBar.className = 'health-bar'; healthBarContainer.appendChild(healthBar); element.appendChild(healthBarContainer); targetObject.healthBar = healthBar; }
-
     const difficulty = difficultySettings[gameState.currentDifficulty];
     let speed = (difficulty.minSpeed + Math.random() * (difficulty.maxSpeed - difficulty.minSpeed));
     if(isMiniboss) speed *= 0.7; if(isFinalBoss) speed *= 0.5;
-
     let startX, startY, speedX = 0, speedY = 0;
     const direction = Math.random() < 0.5 ? 1 : -1;
-
     if (targetObject.pattern === 'vertical') { startX = Math.random() * (gameContainer.clientWidth - 250); startY = gameContainer.clientHeight; speedY = -speed; }
     else { speedX = speed * direction; startX = direction === 1 ? -200 : gameContainer.clientWidth; startY = Math.random() * (gameContainer.clientHeight - (isMiniboss ? 200 : 100)); element.style.transform = direction === -1 ? 'scaleX(-1)' : ''; }
-    
     element.style.top = `${startY}px`; element.style.left = `${startX}px`;
-
     Object.assign(targetObject, { x: startX, y: startY, speedX, speedY, startY_wave: startY, waveAmp: 40 + Math.random() * 40, waveFreq: 0.01 + Math.random() * 0.01 });
     gameState.activeTargets.push(targetObject);
-    
     element.addEventListener('click', () => {
         if (gameState.isPaused) return;
         if (isMiniboss || isFinalBoss) {
@@ -210,11 +194,10 @@ function gameLoop() {
                 case 'wavy': target.x += target.speedX; target.y = target.startY_wave + Math.sin(target.x * target.waveFreq) * target.waveAmp; break;
                 case 'vertical': target.y += target.speedY; break;
             }
-            target.element.style.left = `${target.x}px`; target.element.style.top = `${target.y}px`;
-
+            target.element.style.left = `${target.x}px`;
+            target.element.style.top = `${target.y}px`;
             let escapedHorizontal = target.pattern !== 'vertical' && (target.x > gameContainer.clientWidth + 50 || target.x < -200);
             let escapedTop = target.pattern === 'vertical' && target.y < -150;
-
             if (escapedTop && target.isFinalBoss) {
                 gameState.playerHealth -= 5; target.y = gameContainer.clientHeight; updateGameUI();
                 if (gameState.playerHealth <= 0) { endGame(false, translations[gameState.currentLang].playerDied); return; }
@@ -240,12 +223,9 @@ function endGame(didWin, customMessage = "", isFinalVictory = false) {
     const gameOverTitleEl = document.getElementById('gameOverTitle');
     const gameOverMessageEl = document.getElementById('gameOverMessage');
     const restartButtonEl = document.getElementById('restartButton');
-
     openShopButtonEl.classList.add('hidden');
     if (isFinalVictory) {
-        if (!playerData.megalodonDefeatedOn) { // Нараховуємо перлини тільки раз
-            playerData.pearls += 7;
-        }
+        if (!playerData.megalodonDefeatedOn) { playerData.pearls += 7; }
         playerData.megalodonDefeatedOn = gameState.currentDifficulty;
         savePlayerData();
         gameOverTitleEl.textContent = T.finalWin;
@@ -257,7 +237,6 @@ function endGame(didWin, customMessage = "", isFinalVictory = false) {
     }
     restartButtonEl.textContent = T.restartButton;
     gameOverScreen.classList.remove('hidden');
-    uiContainer.classList.add('hidden'); playerHealthDisplay.classList.add('hidden'); inGameControls.classList.add('hidden');
 }
 
 function togglePause() {
@@ -277,7 +256,6 @@ function stopGameActivity(clearScreen) {
 function returnToMenu() {
     stopGameActivity(true);
     showScreen('main');
-    uiContainer.classList.add('hidden'); inGameControls.classList.add('hidden'); playerHealthDisplay.classList.add('hidden');
     if (gameState.animationFrameId) { cancelAnimationFrame(gameState.animationFrameId); gameState.animationFrameId = null; }
 }
 

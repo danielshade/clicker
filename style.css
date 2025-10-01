@@ -67,6 +67,7 @@ body {
 .messageScreen button { font-family: 'Creepster', cursive; color: var(--text-light); background-color: var(--dark-red); border: 3px solid var(--main-red); border-radius: 10px; transition: all 0.2s ease; cursor: url('assets/anchor.png'), auto; }
 .messageScreen button:hover { background-color: var(--main-red); border-color: var(--text-light); }
 #playButton, #restartButton, #shopBackButton, #mapBackButton, #backToMainButton { font-size: 32px; padding: 15px 50px; }
+#openShopButton { font-size: 28px; padding: 12px 40px; }
 .button-row { display: flex; gap: 10px; justify-content: center; }
 .button-row button { font-size: 20px; padding: 10px; width: 180px; }
 .button-row button.selected { background-color: var(--main-red); border-color: var(--text-light); }
@@ -89,6 +90,7 @@ body {
 .shop-item button { font-size: 22px; padding: 8px 25px; }
 .shop-item button:disabled { background-color: #555; border-color: #888; color: #aaa; cursor: not-allowed; }
 #pearl-display { font-size: 32px; margin-top: 20px; text-shadow: 1px 1px 2px #fff; }
+#shopTitle { color: #0A1931; text-shadow: 0px 0px 8px rgba(255, 255, 255, 0.6); }
 
 #mapScreen { background-color: transparent; }
 .map-container { display: flex; gap: 30px; }
