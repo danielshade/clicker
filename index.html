@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
     <div id="gameContainer">
         <div id="uiContainer" class="hidden">
             <div id="levelDisplay"></div>
@@ -22,6 +23,7 @@
             <img src="assets/stanley.png" alt="Стенлі">
             <p id="notification-text"></p>
         </div>
+
         <div id="mainMenuScreen" class="messageScreen">
             <div class="menu-panel main-menu">
                 <div id="userInfo" class="hidden">
@@ -39,6 +41,7 @@
                 </div>
             </div>
         </div>
+        
         <div id="authScreen" class="messageScreen hidden">
             <div class="menu-panel auth-menu">
                 <div class="auth-tabs">
@@ -54,6 +57,7 @@
                 <button id="authBackButton"></button>
             </div>
         </div>
+
         <div id="setupScreen" class="messageScreen hidden">
             <div class="menu-panel setup-menu">
                 <div id="character-container">
@@ -72,6 +76,7 @@
                 </div>
             </div>
         </div>
+
         <div id="mapScreen" class="messageScreen hidden">
             <div class="menu-panel map-menu">
                 <h1 id="mapTitle"></h1>
@@ -88,6 +93,7 @@
                 <button id="mapBackButton"></button>
             </div>
         </div>
+
         <div id="pauseScreen" class="messageScreen hidden">
             <div class="menu-panel">
                 <h1 id="pauseTitle"></h1>
@@ -102,6 +108,7 @@
                 <button id="openShopButton" class="hidden"></button>
             </div>
         </div>
+        
         <div id="shopScreen" class="messageScreen hidden">
             <div class="menu-panel">
                 <div id="shop-container">
@@ -132,6 +139,7 @@
             </div>
         </div>
     </div>
+    
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
