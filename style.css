@@ -1,11 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Creepster&display=swap');
 :root { --main-red: #ff4848; --dark-red: #a01c1c; --border-color: #0a203e; --text-light: #fff; --hp-color: #32cd32; --text-dark: #2c1e14; --panel-border: #5a3d2b; }
-body { font-family: 'Creepster', cursive; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-size: cover; background-position: center; color: var(--main-red); overflow: hidden; cursor: url('assets/anchor.png'), auto; }
+body { font-family: 'Creepster', cursive; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-size: cover; background-position: center; color: var(--main-red); overflow: hidden; cursor: url('./assets/anchor.png'), auto; }
 #gameContainer { width: 90vw; height: 80vh; max-width: 1000px; max-height: 700px; border: 5px solid var(--border-color); background-color: rgba(0, 0, 0, 0.4); position: relative; box-shadow: 0 0 30px rgba(0, 0, 0, 0.7); transition: background-image 0.5s ease-in-out; }
 
-.bg-kings-coast { background-image: url('assets/background.jpg'); }
-.bg-abyss { background-image: url('assets/abyss_bg.jpg'); }
-.bg-kraken { background-image: url('assets/kraken_bg.jpg'); }
+.bg-kings-coast { background-image: url('./assets/background.jpg'); }
+.bg-abyss { background-image: url('./assets/abyss_bg.jpg'); }
+.bg-kraken { background-image: url('./assets/kraken_bg.jpg'); }
 
 .target { position: absolute; -webkit-user-drag: none; user-select: none; transition: transform 0.2s ease, opacity 0.3s ease; }
 .target:hover { transform: scale(1.1); }
@@ -24,10 +24,10 @@ body { font-family: 'Creepster', cursive; display: flex; justify-content: center
 #uiContainer { position: absolute; top: 10px; right: 15px; display: flex; justify-content: flex-end; align-items: center; gap: 20px; font-size: 36px; text-shadow: 2px 2px 5px #000; z-index: 50; }
 #playerHealthDisplay { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); color: var(--hp-color); font-size: 36px; text-shadow: 2px 2px 5px #000; z-index: 50; }
 #inGameControls { position: absolute; bottom: 10px; left: 15px; z-index: 50; display: flex; gap: 10px; }
-#inGameControls button { font-family: 'Creepster', cursive; font-size: 20px; padding: 5px 15px; background-color: rgba(160, 28, 28, 0.7); color: var(--text-light); border: 2px solid var(--main-red); border-radius: 8px; transition: all 0.2s ease; cursor: url('assets/anchor.png'), auto; }
+#inGameControls button { font-family: 'Creepster', cursive; font-size: 20px; padding: 5px 15px; background-color: rgba(160, 28, 28, 0.7); color: var(--text-light); border: 2px solid var(--main-red); border-radius: 8px; transition: all 0.2s ease; cursor: url('./assets/anchor.png'), auto; }
 #inGameControls button:hover { background-color: var(--main-red); }
 .messageScreen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.9); display: flex; justify-content: center; align-items: center; text-align: center; z-index: 100; padding: 20px; box-sizing: border-box; }
-.menu-panel { background-image: url('assets/ui_bg.png'); background-size: 100% 100%; padding: 30px 40px; border-radius: 15px; box-shadow: 0 0 25px rgba(0,0,0,0.5); max-width: 95%; color: var(--text-dark); display: flex; flex-direction: column; align-items: center; gap: 15px; }
+.menu-panel { background-image: url('./assets/ui_bg.png'); background-size: 100% 100%; padding: 30px 40px; border-radius: 15px; box-shadow: 0 0 25px rgba(0,0,0,0.5); max-width: 95%; color: var(--text-dark); display: flex; flex-direction: column; align-items: center; gap: 15px; }
 .main-menu { width: 500px; }
 .main-menu button { width: 80%; font-size: 32px; padding: 12px; }
 .main-menu button:disabled { background-color: #555; border-color: #888; color: #aaa; cursor: not-allowed; opacity: 0.6; }
@@ -38,7 +38,7 @@ body { font-family: 'Creepster', cursive; display: flex; justify-content: center
 #logoutButton { font-size: 20px !important; padding: 8px 20px !important; width: auto !important; }
 .setup-menu { flex-direction: row; gap: 20px; }
 .messageScreen p { font-size: 24px; margin: 0; }
-.messageScreen button { font-family: 'Creepster', cursive; color: var(--text-light); background-color: var(--dark-red); border: 3px solid var(--main-red); border-radius: 10px; transition: all 0.2s ease; cursor: url('assets/anchor.png'), auto; }
+.messageScreen button { font-family: 'Creepster', cursive; color: var(--text-light); background-color: var(--dark-red); border: 3px solid var(--main-red); border-radius: 10px; transition: all 0.2s ease; cursor: url('./assets/anchor.png'), auto; }
 .messageScreen button:hover { background-color: var(--main-red); border-color: var(--text-light); }
 #playButton, #restartButton, #shopBackButton, #mapBackButton, #backToMainButton, #authBackButton, #authSubmitButton { font-size: 32px; padding: 15px 50px; }
 #openShopButton { font-size: 28px; padding: 12px 40px; }

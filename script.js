@@ -14,15 +14,15 @@ const db = firebase.firestore();
 // --- ГОЛОВНА СТРУКТУРА ДАНИХ ГРИ ---
 const gameConfig = {
     enemies: {
-        shark1:      { src: 'assets/shark_1.png', sizeClass: 'shark' },
-        shark2:      { src: 'assets/shark_2.png', sizeClass: 'shark' },
-        shark3:      { src: 'assets/shark_3.png', sizeClass: 'shark' },
-        octopus:     { src: 'assets/octopus.png', sizeClass: 'octopus' },
-        barracuda:   { src: 'assets/barracuda.png', sizeClass: 'barracuda' },
-        white_shark: { src: 'assets/white_shark.png', sizeClass: 'miniboss', hp: 20, points: 10, damage: 2 },
-        squid:       { src: 'assets/squid.png', sizeClass: 'squid', hp: 25, points: 15, damage: 2, pattern: 'wavy' },
-        megalodon:   { src: 'assets/megalodon.png', sizeClass: 'finalboss', pattern: 'vertical', hp: { easy: 38, normal: 50, jaws: 100 }, damage: 5 },
-        kraken:      { src: 'assets/kraken.png', sizeClass: 'kraken', pattern: 'vertical', hp: { easy: 45, normal: 60, jaws: 120 }, damage: 5 }
+        shark1:      { src: './assets/shark_1.png', sizeClass: 'shark' },
+        shark2:      { src: './assets/shark_2.png', sizeClass: 'shark' },
+        shark3:      { src: './assets/shark_3.png', sizeClass: 'shark' },
+        octopus:     { src: './assets/octopus.png', sizeClass: 'octopus' },
+        barracuda:   { src: './assets/barracuda.png', sizeClass: 'barracuda' },
+        white_shark: { src: './assets/white_shark.png', sizeClass: 'miniboss', hp: 20, points: 10, damage: 2 },
+        squid:       { src: './assets/squid.png', sizeClass: 'squid', hp: 25, points: 15, damage: 2, pattern: 'wavy' },
+        megalodon:   { src: './assets/megalodon.png', sizeClass: 'finalboss', pattern: 'vertical', hp: { easy: 38, normal: 50, jaws: 100 }, damage: 5 },
+        kraken:      { src: './assets/kraken.png', sizeClass: 'kraken', pattern: 'vertical', hp: { easy: 45, normal: 60, jaws: 120 }, damage: 5 }
     },
     mapsData: [ KINGS_COAST_DATA, ABYSS_SHACKLES_DATA ]
 };
@@ -137,3 +137,4 @@ function openMapScreen() { showScreen('map'); const map2 = document.getElementBy
 function handleAuthSubmit() { const email = authEmail.value; const password = authPassword.value; authError.classList.add('hidden'); const action = isLoginMode ? auth.signInWithEmailAndPassword(email, password) : auth.createUserWithEmailAndPassword(email, password); action.then(userCredential => { console.log(isLoginMode ? "Успішний вхід:" : "Акаунт створено:", userCredential.user); showScreen('main'); }).catch(error => { authError.textContent = translations[gameState.currentLang].authError + error.message; authError.classList.remove('hidden'); }); }
 function handleLogout() { auth.signOut().then(() => console.log("Користувач вийшов.")); }
 function createMiniboss(type) { if (gameState.bossOnScreen || gameState.isPaused) return; gameState.bossOnScreen = true; createTarget(type, false, true); }
+  
