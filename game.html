@@ -12,7 +12,9 @@
         .bg-kings-coast { background-image: url('assets/background.jpg'); }
         .bg-abyss { background-image: url('assets/abyss_bg.jpg'); }
         .bg-kraken { background-image: url('assets/kraken_bg.jpg'); }
-        .bg-corals { background-image: url('assets/abyss_bg.jpg'); } /* Placeholder background */
+        .bg-corals-despair { background-image: url('assets/corals_despair_bg.jpg'); }
+        .bg-corals-acceptance { background-image: url('assets/corals_acceptance_bg.jpg'); }
+        .bg-corals-abyss { background-image: url('assets/corals_abyss_bg.jpg'); }
         .target { position: absolute; -webkit-user-drag: none; user-select: none; transition: transform 0.2s ease, opacity 0.3s ease; }
         .target:hover { transform: scale(1.1); }
         .target.dying { opacity: 0; transform: scale(0.8) rotate(-25deg); }
@@ -45,7 +47,7 @@
         .messageScreen p { font-size: 24px; margin: 0; }
         .messageScreen button { font-family: 'Creepster', cursive; color: var(--text-light); background-color: var(--dark-red); border: 3px solid var(--main-red); border-radius: 10px; transition: all 0.2s ease; cursor: url('assets/anchor.png'), auto; }
         .messageScreen button:hover { background-color: var(--main-red); border-color: var(--text-light); }
-        #playButton, #restartButton, #shopBackButton, #mapBackButton, #backToMainButton, #scrollBackButton { font-size: 32px; padding: 15px 50px; }
+        #playButton, #restartButton, #shopBackButton, #mapBackButton, #backToMainButton, #scrollBackButton, #aboutBackButton { font-size: 32px; padding: 15px 50px; }
         #openShopButton { font-size: 28px; padding: 12px 40px; }
         .button-row { display: flex; gap: 10px; justify-content: center; }
         .button-row button { font-size: 20px; padding: 10px; width: 180px; }
@@ -57,7 +59,7 @@
         #stanley-notification.show { opacity: 1; }
         #stanley-notification img { width: 60px; height: 60px; border-radius: 50%; }
         #stanley-notification p { font-size: 18px; color: var(--text-light); text-align: left; }
-        #shopScreen, #mapScreen, #scrollScreen { background-color: transparent; }
+        #shopScreen, #mapScreen, #scrollScreen, #aboutScreen { background-color: transparent; }
         #shop-container { display: flex; flex-direction: column; align-items: center; gap: 15px; width: 100%; }
         #shop-header { display: flex; align-items: center; gap: 20px; }
         #mermaid-portrait { width: 150px; height: 150px; }
@@ -78,6 +80,14 @@
         .map-item:not(.locked) p { display: none; }
         #scrollScreen .menu-panel { background-image: none; background-color: #000; border: 3px solid var(--panel-border); color: #fff; }
         #scroll-text { font-size: 22px; max-width: 600px; text-align: justify; padding: 20px; }
+        #aboutScreen .menu-panel { background-color: rgba(0,0,0,0.5); }
+        #aboutScreen h1 { color: var(--text-light); }
+        #aboutScreen .about-container { display: flex; gap: 20px; margin-top: 20px; }
+        .bio-card { display: flex; flex-direction: column; align-items: center; gap: 10px; background-color: rgba(0,0,0,0.8); padding: 15px; border-radius: 10px; flex-basis: 50%; border: 3px solid var(--panel-border); }
+        .bio-card img { width: 120px; height: 120px; border-radius: 50%; }
+        .bio-card h3 { font-size: 32px; margin: 0; color: var(--text-light); }
+        .bio-card p { font-size: 18px; text-align: justify; color: var(--text-light); }
+        .bio-card .facts { font-style: italic; }
     </style>
 </head>
 <body>
@@ -92,7 +102,28 @@
                 <button id="startButton"></button>
                 <button id="mapButton"></button>
                 <button id="mainMenuShopButton"></button>
+                <button id="aboutButton"></button>
                 <div class="button-row" id="lang-selector"> <button data-lang="uk" class="selected">Українська</button> <button data-lang="en">English</button> </div>
+            </div>
+        </div>
+        <div id="aboutScreen" class="messageScreen hidden">
+            <div class="menu-panel">
+                <h1 id="aboutTitle"></h1>
+                <div class="about-container">
+                    <div class="bio-card">
+                        <img src="assets/stanley.png" alt="Стенлі">
+                        <h3 id="stanley-name"></h3>
+                        <p id="stanley-bio"></p>
+                        <p id="stanley-facts" class="facts"></p>
+                    </div>
+                    <div class="bio-card">
+                        <img src="assets/mermaid.png" alt="Русалка">
+                        <h3 id="mermaid-name"></h3>
+                        <p id="mermaid-bio"></p>
+                        <p id="mermaid-facts" class="facts"></p>
+                    </div>
+                </div>
+                <button id="aboutBackButton"></button>
             </div>
         </div>
         <div id="setupScreen" class="messageScreen hidden"> <div class="menu-panel setup-menu"> <div id="character-container"> <img id="stanley-portrait" src="assets/stanley.png" alt="Пірат Стенлі"> <div id="stanley-dialogue"></div> </div> <div id="settings-container"> <p id="setupDiffLabel"></p> <div class="button-row" id="difficulty-selector"> <button data-difficulty="easy" id="diffBtnEasy" class="selected">Легко пливу</button> <button data-difficulty="normal" id="diffBtnNormal">Норм. зависаю</button> <button data-difficulty="jaws" id="diffBtnJaws">JAWS</button> </div> <button id="playButton"></button> <button id="backToMainButton"></button> </div> </div> </div>
@@ -142,8 +173,12 @@
             ]
         };
         const CREEPY_CORALS_DATA = {
-            name_uk: "Моторошні Корали", name_en: "Creepy Corals", background: 'bg-corals',
-            levels: [ { name_uk: "Затонулий корабель", name_en: "The Sunken Ship", enemies: ['barracuda'] } ]
+            name_uk: "Моторошні Корали", name_en: "Creepy Corals",
+            levels: [
+                { name_uk: "Відчай", name_en: "Despair", enemies: ['shark1', 'shark2', 'octopus'], background: 'bg-corals-despair' },
+                { name_uk: "Прийняття", name_en: "Acceptance", enemies: ['moray_eel', 'stingray'], miniboss: 'squid', background: 'bg-corals-acceptance' },
+                { name_uk: "Безодня", name_en: "Abyss", finalBoss: 'evil_mermaid', background: 'bg-corals-abyss' }
+            ]
         };
         const gameConfig = {
             enemies: {
@@ -152,10 +187,13 @@
                 shark3:      { src: 'assets/shark_3.png', sizeClass: 'shark' },
                 octopus:     { src: 'assets/octopus.png', sizeClass: 'octopus' },
                 barracuda:   { src: 'assets/barracuda.png', sizeClass: 'barracuda' },
+                moray_eel:   { src: 'assets/moray_eel.png', sizeClass: 'barracuda' }, 
+                stingray:    { src: 'assets/stingray.png', sizeClass: 'octopus' }, 
                 white_shark: { src: 'assets/white_shark.png', sizeClass: 'miniboss', hp: 20, points: 10, damage: 2 },
                 squid:       { src: 'assets/squid.png', sizeClass: 'squid', hp: 25, points: 15, damage: 2, pattern: 'wavy' },
                 megalodon:   { src: 'assets/megalodon.png', sizeClass: 'finalboss', pattern: 'vertical', hp: { easy: 38, normal: 50, jaws: 100 }, damage: 5 },
-                kraken:      { src: 'assets/kraken.png', sizeClass: 'kraken', pattern: 'vertical', hp: { easy: 45, normal: 60, jaws: 120 }, damage: 5 }
+                kraken:      { src: 'assets/kraken.png', sizeClass: 'kraken', pattern: 'vertical', hp: { easy: 45, normal: 60, jaws: 120 }, damage: 5 },
+                evil_mermaid:{ src: 'assets/evil_mermaid.png', sizeClass: 'finalboss', pattern: 'wavy', hp: { easy: 50, normal: 70, jaws: 140 }, damage: 6 }
             },
             mapsData: [ KINGS_COAST_DATA, ABYSS_SHACKLES_DATA, CREEPY_CORALS_DATA ]
         };
@@ -164,6 +202,7 @@
                 map: "Карта Світу", map1: "Узбережжя Короля", map2: "Окови Безодні", map3: "Моторошні Корали", map2Locked: "(Перемогти Мегалодона на Нормалі+)", map3Locked: "(Перемогти Кракена на Нормалі+)", play: "Грати", back: "Назад",
                 shop: "Забавульки Русалки", shopWeapon: "Зброя", shopWeaponDesc: "Нові гарпуни (скоро)", shopScrolls: "Свитки", shopScrollsDesc: "Древні історії", read: "Читати", shopLife: "Життя", shopLifeDesc: "+1 ❤️ (10 Перлин)", shopBuy: "Купити", pearl: "Перлин", shopLifeLock: "Перемогти боса на Нормальній складності",
                 scrollTitle: "Легенда про Кракена", scrollText: "Переказ старого рибалки: Глибоко, де сонце лише спогад, спить Він. Не звір, а живий острів з очима-ліхтарями, що ваблять кораблі. Його щупальця — це канати, що тягнуть цілі флоти у мовчазну безодню. Кажуть, він охороняє затонулу Атлантиду, а його серце — чорна перлина, яка дарує владу над морями. Але той, хто потривожить його сон, почує лише один звук — тріск власного корабля.",
+                aboutTitle: "Персонажі", aboutButton: "Персонажі", stanleyName: "Стенлі Акулосмерть", stanleyBio: "Старий морський вовк, який втратив брата у сутичці з Мегалодоном. Тепер він присвятив своє життя захисту рідних вод від будь-яких потвор, що спливають з глибин.", stanleyFacts: "Цікавий факт: Його папуга, Кекс, насправді не говорить, а лише майстерно імітує звук скрипу старої шхуни.", mermaidName: "Русалка-торговка", mermaidBio: "Таємнича володарка підводного ринку. Вона збирає рідкісні перлини та артефакти з затонулих кораблів. Ніхто не знає, звідки вона, але її товари завжди найкращі.", mermaidFacts: "Цікавий факт: Вона обміняла свій голос на вміння знаходити будь-який загублений скарб, тому спілкується лише телепатично.",
                 stanleyDialogue: "Аррр, друже! Я — старий Стенлі Акулосмерть! Ці прокляті акули знову тероризують мої береги! Допоможеш старому пірату?", gameTitle: "Водяна Агонія", langLabel: "Мова", diffLabel: "Складність", level: "Рівень", score: "Очки", time: "Час", startButton: "Старт", playButton: "В БІЙ!", diffEasy: "Легко пливу", diffNormal: "Норм. зависаю", diffJaws: "JAWS", pause: "Пауза", resume: "Продовжити", mainMenu: "Головне меню", pauseTitle: "ПАУЗА", gameOver: "ГРУ ЗАВЕРШЕНО", timeUp: "Час вийшов!", win: "ПЕРЕМОГА!", winMsg: "Ти захистив води!", finalScore: "Ви досягли рівня", restartButton: "ГРАТИ ЗНОВУ", 
                 finalBossNotification: "Це він! Мегалодон, що забрав мого брата! Не дай йому дістатися поверхні, благаю!", 
                 krakenBossNotification: "Цей моторошний ірод - причина, чому Атлантида більше не з нами. Будь обережний!",
@@ -173,6 +212,7 @@
                 map: "World Map", map1: "King's Coast", map2: "Abyss Shackles", map3: "Creepy Corals", map2Locked: "(Defeat Megalodon on Normal+)", map3Locked: "(Defeat Kraken on Normal+)", play: "Play", back: "Back",
                 shop: "The Mermaid's Trinkets", shopWeapon: "Weapons", shopWeaponDesc: "New harpoons (soon)", shopScrolls: "Scrolls", shopScrollsDesc: "Ancient tales", read: "Read", shopLife: "Life", shopLifeDesc: "+1 ❤️ (10 Pearls)", shopBuy: "Buy", pearl: "Pearls", shopLifeLock: "Defeat boss on Normal",
                 scrollTitle: "The Legend of the Kraken", scrollText: "An old fisherman's tale: Deep where the sun is but a memory, It sleeps. Not a beast, but a living island with lantern-eyes that lure ships. Its tentacles are the ropes that pull entire fleets into the silent abyss. They say it guards the sunken Atlantis, and its heart is a black pearl that grants dominion over the seas. But he who disturbs its slumber will hear only one sound—the splintering of his own ship.",
+                aboutTitle: "Characters", aboutButton: "Characters", stanleyName: "Stanley Sharkdeath", stanleyBio: "An old sea dog who lost his brother in a battle with the Megalodon. He has since dedicated his life to protecting his home waters from any monstrosities that surface from the deep.", stanleyFacts: "Fun fact: His parrot, Cupcake, doesn't actually talk but masterfully mimics the sound of an old schooner's creak.", mermaidName: "The Merchant Mermaid", mermaidBio: "The mysterious mistress of the underwater market. She collects rare pearls and artifacts from sunken ships. No one knows where she came from, but her goods are always the finest.", mermaidFacts: "Fun fact: She traded her voice for the ability to find any lost treasure, which is why she communicates only telepathically.",
                 stanleyDialogue: "Arrr, matey! The name's Stanley Sharkdeath! These cursed sharks are terrorizin' me shores again! Will ye help an old pirate out?", gameTitle: "Watery Agony", langLabel: "Language", diffLabel: "Difficulty", level: "Level", score: "Score", time: "Time", startButton: "Start", playButton: "TO BATTLE!", diffEasy: "Easy Swim", diffNormal: "Hanging Out", diffJaws: "JAWS", pause: "Pause", resume: "Resume", mainMenu: "Main Menu", pauseTitle: "PAUSED", gameOver: "GAME OVER", timeUp: "Time is up!", win: "VICTORY!", winMsg: "You've protected the waters!", finalScore: "You reached level", restartButton: "PLAY AGAIN", 
                 finalBossNotification: "That's him! The Megalodon that took me brother! Don't let him reach the surface, I beg ye!",
                 krakenBossNotification: "This gruesome fiend is the reason Atlantis is no longer with us. Be careful!",
@@ -189,7 +229,7 @@
         function loadPlayerData() { const data = localStorage.getItem('wateryAgonyData'); if (data) playerData = JSON.parse(data); }
 
         document.addEventListener('DOMContentLoaded', () => {
-            allScreens = { main: document.getElementById('mainMenuScreen'), setup: document.getElementById('setupScreen'), map: document.getElementById('mapScreen'), shop: document.getElementById('shopScreen'), gameover: document.getElementById('gameOverScreen'), pause: document.getElementById('pauseScreen'), scroll: document.getElementById('scrollScreen') };
+            allScreens = { main: document.getElementById('mainMenuScreen'), setup: document.getElementById('setupScreen'), map: document.getElementById('mapScreen'), shop: document.getElementById('shopScreen'), gameover: document.getElementById('gameOverScreen'), pause: document.getElementById('pauseScreen'), scroll: document.getElementById('scrollScreen'), about: document.getElementById('aboutScreen') };
             gameUi = { container: document.getElementById('uiContainer'), controls: document.getElementById('inGameControls'), health: document.getElementById('playerHealthDisplay') };
             stanleyNotification = document.getElementById('stanley-notification');
             notificationText = document.getElementById('notification-text');
@@ -208,6 +248,8 @@
             document.getElementById('startButton').addEventListener('click', () => { gameState.currentMap = 0; showScreen('setup'); });
             document.getElementById('mapButton').addEventListener('click', openMapScreen);
             document.getElementById('mainMenuShopButton').addEventListener('click', openShop);
+            document.getElementById('aboutButton').addEventListener('click', () => showScreen('about'));
+            document.getElementById('aboutBackButton').addEventListener('click', () => showScreen('main'));
             document.getElementById('difficulty-selector').addEventListener('click', (e) => { if (e.target.tagName === 'BUTTON') { gameState.currentDifficulty = e.target.dataset.difficulty; document.getElementById('difficulty-selector').querySelector('.selected').classList.remove('selected'); e.target.classList.add('selected'); } });
             document.getElementById('playButton').addEventListener('click', startGame);
             document.getElementById('backToMainButton').addEventListener('click', () => showScreen('main'));
@@ -226,15 +268,62 @@
         }
 
         function showScreen(screenName) { Object.values(allScreens).forEach(s => s.classList.add('hidden')); Object.values(gameUi).forEach(el => el.classList.add('hidden')); if (allScreens[screenName]) allScreens[screenName].classList.remove('hidden'); }
-        function updateUIText() { const T = translations[gameState.currentLang]; const DOMElements = { 'gameTitle': T.gameTitle, 'startButton': T.startButton, 'mapButton': T.map, 'mainMenuShopButton': T.shop, 'setupDiffLabel': T.diffLabel, 'diffBtnEasy': T.diffEasy, 'diffBtnNormal': T.diffNormal, 'diffBtnJaws': T.diffJaws, 'playButton': T.playButton, 'backToMainButton': T.back, 'mapTitle': T.map, 'map1Title': T.map1, 'map2Title': T.map2, 'map3Title': T.map3, 'map2Locked': T.map2Locked, 'map3Locked': T.map3Locked, 'mapBackButton': T.back, 'playMap1Button': T.play, 'playMap2Button': T.play, 'playMap3Button': T.play, 'pauseButton': T.pause, 'resumeButton': T.resume, 'returnToMenuButton': T.mainMenu, 'pauseTitle': T.pauseTitle, 'stanley-dialogue': T.stanleyDialogue, 'shopTitle': T.shop, 'shopWeaponTitle': T.shopWeapon, 'shopWeaponDesc': T.shopWeaponDesc, 'shopScrollsTitle': T.shopScrolls, 'shopScrollsDesc': T.shopScrollsDesc, 'readScrollButton': T.read, 'shopLifeTitle': T.shopLife, 'shopLifeDesc': T.shopLifeDesc, 'shopBackButton': T.backToMenu, 'openShopButton': T.shop, 'scrollTitle': T.scrollTitle, 'scroll-text': T.scrollText, 'scrollBackButton': T.back }; for (const id in DOMElements) { const el = document.getElementById(id); if (el) el.textContent = DOMElements[id]; } }
+        function updateUIText() { const T = translations[gameState.currentLang]; const DOMElements = { 'gameTitle': T.gameTitle, 'startButton': T.startButton, 'mapButton': T.map, 'mainMenuShopButton': T.shop, 'aboutButton': T.aboutButton, 'setupDiffLabel': T.diffLabel, 'diffBtnEasy': T.diffEasy, 'diffBtnNormal': T.diffNormal, 'diffBtnJaws': T.diffJaws, 'playButton': T.playButton, 'backToMainButton': T.back, 'mapTitle': T.map, 'map1Title': T.map1, 'map2Title': T.map2, 'map3Title': T.map3, 'map2Locked': T.map2Locked, 'map3Locked': T.map3Locked, 'mapBackButton': T.back, 'playMap1Button': T.play, 'playMap2Button': T.play, 'playMap3Button': T.play, 'pauseButton': T.pause, 'resumeButton': T.resume, 'returnToMenuButton': T.mainMenu, 'pauseTitle': T.pauseTitle, 'stanley-dialogue': T.stanleyDialogue, 'shopTitle': T.shop, 'shopWeaponTitle': T.shopWeapon, 'shopWeaponDesc': T.shopWeaponDesc, 'shopScrollsTitle': T.shopScrolls, 'shopScrollsDesc': T.shopScrollsDesc, 'readScrollButton': T.read, 'shopLifeTitle': T.shopLife, 'shopLifeDesc': T.shopLifeDesc, 'shopBackButton': T.backToMenu, 'openShopButton': T.shop, 'scrollTitle': T.scrollTitle, 'scroll-text': T.scrollText, 'scrollBackButton': T.back, 'aboutTitle': T.aboutTitle, 'aboutBackButton': T.back, 'stanley-name': T.stanleyName, 'stanley-bio': T.stanleyBio, 'stanley-facts': T.stanleyFacts, 'mermaid-name': T.mermaidName, 'mermaid-bio': T.mermaidBio, 'mermaid-facts': T.mermaidFacts }; for (const id in DOMElements) { const el = document.getElementById(id); if (el) el.textContent = DOMElements[id]; } }
         function updateGameUI() { const T = translations[gameState.currentLang]; playerHealthDisplay.textContent = `❤️ ${Math.max(0, gameState.playerHealth)}`; const levelName = gameConfig.mapsData[gameState.currentMap].levels[gameState.currentLevel][`name_${gameState.currentLang}`]; levelDisplay.textContent = `${T.level}: ${levelName}`; if (!gameConfig.mapsData[gameState.currentMap].levels[gameState.currentLevel].finalBoss) scoreDisplay.textContent = `${T.score}: ${Math.floor(gameState.score)} / ${GOAL_SCORE}`; timerDisplay.textContent = `${T.time}: ${gameState.timeLeft}`; }
         function startGame() { showScreen('none'); Object.values(gameUi).forEach(el => el.classList.remove('hidden')); gameState.playerHealth = 10; gameState.currentLevel = 0; startLevel(); if (!gameState.animationFrameId) gameLoop(); }
-        function startLevel() { const map = gameConfig.mapsData[gameState.currentMap]; const level = map.levels[gameState.currentLevel]; if (level.finalBoss) { triggerFinalBossSequence(); return; } stopGameActivity(false); gameState.bossOnScreen = false; gameState.score = 0; gameState.timeLeft = 120; document.getElementById('gameContainer').className = ''; document.getElementById('gameContainer').classList.add(map.background); timerDisplay.classList.remove('hidden'); scoreDisplay.classList.remove('hidden'); scoreDisplay.textContent = `${translations[gameState.currentLang].score}: 0 / ${GOAL_SCORE}`; updateGameUI(); const difficulty = difficultySettings[gameState.currentDifficulty]; gameState.intervals.push(setInterval(() => { const enemyPool = level.enemies; const randomEnemy = enemyPool[Math.floor(Math.random() * enemyPool.length)]; createTarget(randomEnemy); }, difficulty.spawnInterval)); gameState.intervals.push(setInterval(updateTimer, 1000)); if (level.miniboss) gameState.intervals.push(setTimeout(() => createTarget(level.miniboss, false, true), 10000 + Math.random() * 5000)); }
+        
+        function startLevel() {
+            const map = gameConfig.mapsData[gameState.currentMap];
+            const level = map.levels[gameState.currentLevel];
+            if (level.finalBoss) {
+                triggerFinalBossSequence();
+                return;
+            }
+            stopGameActivity(false);
+            gameState.bossOnScreen = false;
+            gameState.score = 0;
+            gameState.timeLeft = 120;
+            const backgroundClass = level.background || map.background;
+            gameContainer.className = '';
+            gameContainer.classList.add(backgroundClass);
+            timerDisplay.classList.remove('hidden');
+            scoreDisplay.classList.remove('hidden');
+            scoreDisplay.textContent = `${translations[gameState.currentLang].score}: 0 / ${GOAL_SCORE}`;
+            updateGameUI();
+            const difficulty = difficultySettings[gameState.currentDifficulty];
+            gameState.intervals.push(setInterval(() => {
+                const enemyPool = level.enemies;
+                const randomEnemy = enemyPool[Math.floor(Math.random() * enemyPool.length)];
+                createTarget(randomEnemy);
+            }, difficulty.spawnInterval));
+            gameState.intervals.push(setInterval(updateTimer, 1000));
+            if (level.miniboss) {
+                gameState.intervals.push(setTimeout(() => createTarget(level.miniboss, false, true), 10000 + Math.random() * 5000));
+            }
+        }
+
         function triggerFinalBossSequence() { stopGameActivity(true); const T = translations[gameState.currentLang]; let notificationMsg = ''; if (gameState.currentMap === 0) { notificationMsg = T.finalBossNotification; } else if (gameState.currentMap === 1) { notificationMsg = T.krakenBossNotification; } if (notificationMsg) { notificationText.textContent = notificationMsg; stanleyNotification.classList.remove('hidden'); stanleyNotification.classList.add('show'); setTimeout(() => { stanleyNotification.classList.remove('show'); setTimeout(() => { stanleyNotification.classList.add('hidden'); startFinalBossLevel(); }, 500); }, 6000); } else { startFinalBossLevel(); } }
-        function startFinalBossLevel() { stopGameActivity(true); const map = gameConfig.mapsData[gameState.currentMap]; const level = map.levels[gameState.currentLevel]; const bossType = level.finalBoss; gameState.bossOnScreen = false; gameState.timeLeft = 999; gameState.score = 0; document.getElementById('gameContainer').className = ''; document.getElementById('gameContainer').classList.add(level.background || map.background); updateGameUI(); timerDisplay.classList.add('hidden'); scoreDisplay.classList.add('hidden'); createTarget(bossType, true); }
-        function createTarget(type, isFinalBoss = false, isMiniboss = false) { if ((isMiniboss || isFinalBoss) && gameState.bossOnScreen) return; if (isMiniboss || isFinalBoss) gameState.bossOnScreen = true; const enemyData = gameConfig.enemies[type]; if (!enemyData) return; const element = document.createElement('img'); element.src = enemyData.src; element.className = `target ${enemyData.sizeClass}`; const targetObject = { element, type, isFinalBoss, isMiniboss }; if (isMiniboss || isFinalBoss) { targetObject.hp = isFinalBoss ? enemyData.hp[gameState.currentDifficulty] : enemyData.hp; targetObject.maxHp = targetObject.hp; const healthBarContainer = document.createElement('div'); healthBarContainer.className = 'health-bar-container'; const healthBar = document.createElement('div'); healthBar.className = 'health-bar'; healthBarContainer.appendChild(healthBar); element.appendChild(healthBarContainer); targetObject.healthBar = healthBar; } targetObject.pattern = enemyData.pattern || ['horizontal', 'diagonal', 'wavy'][Math.floor(Math.random() * 3)]; const difficulty = difficultySettings[gameState.currentDifficulty]; let speed = (difficulty.minSpeed + Math.random() * (difficulty.maxSpeed - difficulty.minSpeed)); if(isMiniboss) speed *= 0.8; if(isFinalBoss) speed *= 0.6; let startX, startY, speedX = 0, speedY = 0; const direction = Math.random() < 0.5 ? 1 : -1; if (targetObject.pattern === 'vertical') { startX = Math.random() * (gameContainer.clientWidth - 250); startY = gameContainer.clientHeight; speedY = -speed; } else { speedX = speed * direction; startX = direction === 1 ? -200 : gameContainer.clientWidth; startY = Math.random() * (gameContainer.clientHeight - 150); element.style.transform = direction === -1 ? 'scaleX(-1)' : ''; } element.style.top = `${startY}px`; element.style.left = `${startX}px`; Object.assign(targetObject, { x: startX, y: startY, speedX, speedY, startY_wave: startY, waveAmp: 40 + Math.random() * 40, waveFreq: 0.01 + Math.random() * 0.01 }); gameState.activeTargets.push(targetObject); element.addEventListener('click', () => { if (gameState.isPaused) return; if (isMiniboss || isFinalBoss) { targetObject.hp--; targetObject.healthBar.style.width = `${(targetObject.hp / targetObject.maxHp) * 100}%`; if (targetObject.hp <= 0) { if (isFinalBoss) endGame(true, "", true); else { gameState.score += enemyData.points; gameState.bossOnScreen = false; } element.classList.add('dying'); setTimeout(() => element.remove(), 300); gameState.activeTargets = gameState.activeTargets.filter(t => t !== targetObject); } } else { gameState.score += difficultySettings[gameState.currentDifficulty].points; element.classList.add('dying'); setTimeout(() => element.remove(), 300); gameState.activeTargets = gameState.activeTargets.filter(t => t !== targetObject); } updateGameUI(); if (!isMiniboss && !isFinalBoss && gameState.score >= GOAL_SCORE) { gameState.currentLevel++; if (gameState.currentLevel >= gameConfig.mapsData[gameState.currentMap].levels.length - 1) startLevel(); else startLevel(); } }); gameContainer.appendChild(element); }
-        function gameLoop() { if (!gameState.isPaused) { for (let i = gameState.activeTargets.length - 1; i >= 0; i--) { const target = gameState.activeTargets[i]; switch(target.pattern) { case 'horizontal': target.x += target.speedX; break; case 'diagonal': target.x += target.speedX; target.y += (target.speedY || target.speedX * 0.3); if (target.y < 0 || target.y > gameContainer.clientHeight - 100) target.speedY *= -1; break; case 'wavy': target.x += target.speedX; target.y = target.startY_wave + Math.sin(target.x * target.waveFreq) * target.waveAmp; break; case 'vertical': target.y += target.speedY; break; } target.element.style.left = `${target.x}px`; target.element.style.top = `${target.y}px`; let escapedHorizontal = target.pattern !== 'vertical' && (target.x > gameContainer.clientWidth + 50 || target.x < -200); let escapedTop = target.pattern === 'vertical' && target.y < -150; if (escapedTop && target.isFinalBoss) { gameState.playerHealth -= gameConfig.enemies[target.type].damage; target.y = gameContainer.clientHeight; updateGameUI(); if (gameState.playerHealth <= 0) { endGame(false, translations[gameState.currentLang].playerDied); return; } } else if (escapedHorizontal) { if (target.isMiniboss) { gameState.playerHealth -= gameConfig.enemies[target.type].damage; gameState.bossOnScreen = false; updateGameUI(); if (gameState.playerHealth <= 0) { endGame(false, translations[gameState.currentLang].playerDied); return; } } target.element.remove(); gameState.activeTargets.splice(i, 1); } } } gameState.animationFrameId = requestAnimationFrame(gameLoop); }
-        function updateTimer() { if (gameState.isPaused) return; gameState.timeLeft--; updateGameUI(); if (gameState.timeLeft <= 0 && gameState.currentLevel !== 4) { endGame(false, translations[gameState.currentLang].timeUp); } }
+        
+        function startFinalBossLevel() {
+            stopGameActivity(true);
+            const map = gameConfig.mapsData[gameState.currentMap];
+            const level = map.levels[gameState.currentLevel];
+            const bossType = level.finalBoss;
+            gameState.bossOnScreen = false;
+            gameState.timeLeft = 999;
+            gameState.score = 0;
+            const backgroundClass = level.background || map.background;
+            gameContainer.className = '';
+            gameContainer.classList.add(backgroundClass);
+            updateGameUI();
+            timerDisplay.classList.add('hidden');
+            scoreDisplay.classList.add('hidden');
+            createTarget(bossType, true);
+        }
+
+        function createTarget(type, isFinalBoss = false, isMiniboss = false) { if ((isMiniboss || isFinalBoss) && gameState.bossOnScreen) return; if (isMiniboss || isFinalBoss) gameState.bossOnScreen = true; const enemyData = gameConfig.enemies[type]; if (!enemyData) return; const element = document.createElement('img'); element.src = enemyData.src; element.className = `target ${enemyData.sizeClass}`; if (isFinalBoss) { element.classList.add('finalboss'); } const targetObject = { element, type, isFinalBoss, isMiniboss }; if (isMiniboss || isFinalBoss) { targetObject.hp = isFinalBoss ? enemyData.hp[gameState.currentDifficulty] : enemyData.hp; targetObject.maxHp = targetObject.hp; const healthBarContainer = document.createElement('div'); healthBarContainer.className = 'health-bar-container'; const healthBar = document.createElement('div'); healthBar.className = 'health-bar'; healthBarContainer.appendChild(healthBar); element.appendChild(healthBarContainer); targetObject.healthBar = healthBar; } targetObject.pattern = enemyData.pattern || ['horizontal', 'diagonal', 'wavy'][Math.floor(Math.random() * 3)]; const difficulty = difficultySettings[gameState.currentDifficulty]; let speed = (difficulty.minSpeed + Math.random() * (difficulty.maxSpeed - difficulty.minSpeed)); if(isMiniboss) speed *= 0.8; if(isFinalBoss) speed *= 0.6; let startX, startY, speedX = 0, speedY = 0; const direction = Math.random() < 0.5 ? 1 : -1; if (targetObject.pattern === 'vertical') { startX = Math.random() * (gameContainer.clientWidth - 250); startY = gameContainer.clientHeight; speedY = -speed; } else { speedX = speed * direction; startX = direction === 1 ? -200 : gameContainer.clientWidth; startY = Math.random() * (gameContainer.clientHeight - 150); element.style.transform = direction === -1 ? 'scaleX(-1)' : ''; } element.style.top = `${startY}px`; element.style.left = `${startX}px`; Object.assign(targetObject, { x: startX, y: startY, speedX, speedY, startY_wave: startY, waveAmp: 40 + Math.random() * 40, waveFreq: 0.01 + Math.random() * 0.01 }); gameState.activeTargets.push(targetObject); element.addEventListener('click', () => { if (gameState.isPaused) return; if (isMiniboss || isFinalBoss) { targetObject.hp--; targetObject.healthBar.style.width = `${(targetObject.hp / targetObject.maxHp) * 100}%`; if (targetObject.hp <= 0) { if (isFinalBoss) endGame(true, "", true); else { gameState.score += enemyData.points; gameState.bossOnScreen = false; } element.classList.add('dying'); setTimeout(() => element.remove(), 300); gameState.activeTargets = gameState.activeTargets.filter(t => t !== targetObject); } } else { gameState.score += difficultySettings[gameState.currentDifficulty].points; element.classList.add('dying'); setTimeout(() => element.remove(), 300); gameState.activeTargets = gameState.activeTargets.filter(t => t !== targetObject); } updateGameUI(); if (!isMiniboss && !isFinalBoss && gameState.score >= GOAL_SCORE && gameState.currentLevel < gameConfig.mapsData[gameState.currentMap].levels.length -1) { gameState.currentLevel++; startLevel(); } }); gameContainer.appendChild(element); }
+        function gameLoop() { if (!gameState.isPaused) { for (let i = gameState.activeTargets.length - 1; i >= 0; i--) { const target = gameState.activeTargets[i]; switch(target.pattern) { case 'horizontal': target.x += target.speedX; break; case 'diagonal': target.x += target.speedX; target.y += (target.speedY || target.speedX * 0.3); if (target.y < 0 || target.y > gameContainer.clientHeight - 100) target.speedY *= -1; break; case 'wavy': target.x += target.speedX; target.y = target.startY_wave + Math.sin(target.x * target.waveFreq) * target.waveAmp; break; case 'vertical': target.y += target.speedY; break; } target.element.style.left = `${target.x}px`; target.element.style.top = `${target.y}px`; let escapedHorizontal = target.pattern !== 'vertical' && (target.x > gameContainer.clientWidth + 50 || target.x < -200); let escapedTop = target.pattern === 'vertical' && target.y < -150; if (escapedTop && target.isFinalBoss) { gameState.playerHealth -= gameConfig.enemies[target.type].damage; target.y = gameContainer.clientHeight; updateGameUI(); if (gameState.playerHealth <= 0) { endGame(false); return; } } else if (escapedHorizontal) { if (target.isMiniboss) { gameState.playerHealth -= gameConfig.enemies[target.type].damage; gameState.bossOnScreen = false; updateGameUI(); if (gameState.playerHealth <= 0) { endGame(false); return; } } target.element.remove(); gameState.activeTargets.splice(i, 1); } } } gameState.animationFrameId = requestAnimationFrame(gameLoop); }
+        function updateTimer() { if (gameState.isPaused) return; gameState.timeLeft--; updateGameUI(); if (gameState.timeLeft <= 0 && !gameConfig.mapsData[gameState.currentMap].levels[gameState.currentLevel].finalBoss) { endGame(false, translations[gameState.currentLang].timeUp); } }
         function endGame(didWin, customMessage = "", isFinalVictory = false) { stopGameActivity(true); const T = translations[gameState.currentLang]; const openShopButtonEl = document.getElementById('openShopButton'); const gameOverTitleEl = document.getElementById('gameOverTitle'); const gameOverMessageEl = document.getElementById('gameOverMessage'); const restartButtonEl = document.getElementById('restartButton'); openShopButtonEl.classList.add('hidden'); if (isFinalVictory) { if (gameState.currentMap === 0 && !playerData.megalodonDefeatedOn) { playerData.pearls += 7; } if (gameState.currentMap === 1 && !playerData.krakenDefeatedOn) { playerData.pearls += 10; if (gameState.currentDifficulty === 'normal' || gameState.currentDifficulty === 'jaws') { playerData.pearls += 5; } } if (gameState.currentMap === 0) playerData.megalodonDefeatedOn = gameState.currentDifficulty; if (gameState.currentMap === 1) playerData.krakenDefeatedOn = gameState.currentDifficulty; savePlayerData(); gameOverTitleEl.textContent = T.win; gameOverMessageEl.textContent = T.winMsg; openShopButtonEl.classList.remove('hidden'); } else { gameOverTitleEl.textContent = T.gameOver; gameOverMessageEl.textContent = customMessage || `${T.finalScore} '${gameConfig.mapsData[gameState.currentMap].levels[gameState.currentLevel][`name_${gameState.currentLang}`]}'.`; } restartButtonEl.textContent = T.restartButton; allScreens.gameover.classList.remove('hidden'); }
         function togglePause() { gameState.isPaused = !gameState.isPaused; const T = translations[gameState.currentLang]; if (gameState.isPaused) { document.getElementById('pauseButton').textContent = T.resume; allScreens.pause.classList.remove('hidden'); } else { document.getElementById('pauseButton').textContent = T.pause; allScreens.pause.classList.add('hidden'); } }
         function stopGameActivity(clearScreen) { gameState.intervals.forEach(i => { clearInterval(i); clearTimeout(i); }); gameState.intervals = []; if (clearScreen) { gameState.activeTargets.forEach(t => t.element.remove()); gameState.activeTargets = []; } gameState.isPaused = false; }
