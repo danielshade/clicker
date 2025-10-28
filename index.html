@@ -9,113 +9,54 @@
 <body>
 
     <div id="gameContainer">
-        <div id="uiContainer" class="hidden">
-            <div id="levelDisplay"></div>
-            <div id="scoreDisplay"></div>
-            <div id="timerDisplay"></div>
-        </div>
+        <div id="uiContainer" class="hidden"></div>
         <div id="playerHealthDisplay" class="hidden"></div>
-        <div id="inGameControls" class="hidden">
-            <button id="pauseButton"></button>
-            <button id="returnToMenuButton"></button>
-        </div>
-        <div id="stanley-notification" class="hidden">
-            <img src="assets/stanley.png" alt="Стенлі">
-            <p id="notification-text"></p>
-        </div>
+        <div id="inGameControls" class="hidden"></div>
+        <div id="stanley-notification" class="hidden"></div>
 
         <div id="mainMenuScreen" class="messageScreen">
             <div class="menu-panel main-menu">
+                <div id="userInfo" class="hidden">
+                    <p id="userEmail"></p>
+                    <button id="logoutButton"></button>
+                </div>
                 <h1 id="gameTitle"></h1>
-                <button id="startButton"></button>
-                <button id="mapButton"></button>
-                <button id="mainMenuShopButton"></button> <div class="button-row" id="lang-selector">
+                <button id="startButton" disabled></button>
+                <button id="mapButton" disabled></button>
+                <button id="mainMenuShopButton" disabled></button>
+                <button id="authButton"></button> <div class="button-row" id="lang-selector">
                     <button data-lang="uk" class="selected">Українська</button>
                     <button data-lang="en">English</button>
                 </div>
             </div>
         </div>
-
-        <div id="setupScreen" class="messageScreen hidden">
-            <div class="menu-panel setup-menu">
-                <div id="character-container">
-                    <img id="stanley-portrait" src="assets/stanley.png" alt="Пірат Стенлі">
-                    <div id="stanley-dialogue"></div>
-                </div>
-                <div id="settings-container">
-                    <p id="setupDiffLabel"></p>
-                    <div class="button-row" id="difficulty-selector">
-                        <button data-difficulty="easy" id="diffBtnEasy" class="selected">Легко пливу</button>
-                        <button data-difficulty="normal" id="diffBtnNormal">Норм. зависаю</button>
-                        <button data-difficulty="jaws" id="diffBtnJaws">JAWS</button>
-                    </div>
-                    <button id="playButton"></button>
-                    <button id="backToMainButton"></button>
-                </div>
-            </div>
-        </div>
-
-        <div id="mapScreen" class="messageScreen hidden">
-            <div class="menu-panel map-menu">
-                <h1 id="mapTitle"></h1>
-                <div class="map-container">
-                    <div class="map-item">
-                        <h2 id="map1Title"></h2>
-                        <button class="map-play-button" id="playMap1Button"></button>
-                    </div>
-                    <div class="map-item locked">
-                        <h2 id="map2Title"></h2>
-                        <p id="map2Locked"></p>
-                    </div>
-                </div>
-                <button id="mapBackButton"></button>
-            </div>
-        </div>
-
-        <div id="pauseScreen" class="messageScreen hidden">
-            <div class="menu-panel">
-                <h1 id="pauseTitle"></h1>
-                <button id="resumeButton"></button>
-            </div>
-        </div>
-        <div id="gameOverScreen" class="messageScreen hidden">
-            <div class="menu-panel">
-                <h1 id="gameOverTitle"></h1>
-                <p id="gameOverMessage"></p>
-                <button id="restartButton"></button>
-                <button id="openShopButton" class="hidden"></button> </div>
-        </div>
         
-        <div id="shopScreen" class="messageScreen hidden">
-            <div class="menu-panel">
-                <div id="shop-container">
-                    <div id="shop-header">
-                        <img id="mermaid-portrait" src="assets/mermaid.png" alt="Русалка">
-                        <h1 id="shopTitle"></h1>
-                    </div>
-                    <p id="pearl-display"></p>
-                    <div id="shop-items">
-                        <div class="shop-item">
-                            <h3 id="shopWeaponTitle"></h3>
-                            <p id="shopWeaponDesc"></p>
-                            <button disabled></button>
-                        </div>
-                        <div class="shop-item">
-                            <h3 id="shopScrollsTitle"></h3>
-                            <p id="shopScrollsDesc"></p>
-                            <button disabled></button>
-                        </div>
-                        <div class="shop-item">
-                            <h3 id="shopLifeTitle"></h3>
-                            <p id="shopLifeDesc"></p>
-                            <button id="buyLifeButton" disabled></button>
-                        </div>
-                    </div>
-                    <button id="shopBackButton"></button>
+        <div id="authScreen" class="messageScreen hidden">
+            <div class="menu-panel auth-menu">
+                <div class="auth-tabs">
+                    <button id="loginTab" class="auth-tab selected"></button>
+                    <button id="registerTab" class="auth-tab"></button>
                 </div>
+                <div class="auth-form">
+                    <input type="email" id="authEmail" placeholder="Email">
+                    <input type="password" id="authPassword" placeholder="Пароль">
+                    <p id="authError" class="hidden"></p>
+                    <button id="authSubmitButton"></button>
+                </div>
+                <button id="authBackButton"></button>
             </div>
         </div>
+
+        <div id="setupScreen" class="messageScreen hidden"></div>
+        <div id="mapScreen" class="messageScreen hidden"></div>
+        <div id="pauseScreen" class="messageScreen hidden"></div>
+        <div id="gameOverScreen" class="messageScreen hidden"></div>
+        <div id="shopScreen" class="messageScreen hidden"></div>
     </div>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     
     <script src="script.js" defer></script>
 </body>
