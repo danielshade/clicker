@@ -9,14 +9,17 @@ const TRANSLATIONS = {
         bestiary: "БЕСТІАРІЙ", back: "НАЗАД", score: "Очки", time: "Час", 
         victory: "ЕТАП ПРОЙДЕНО", next: "ЗАНУРИТИСЬ", finish: "НА ПОВЕРХНЮ", 
         diff: "СКЛАДНІСТЬ", easy: "ЛЕГКО", normal: "НОРМ", jaws: "JAWS", 
-        pearls: "Перлини", loot: "ВАШІ ТРОФЕЇ", goods: "ТОВАРИ"
+        pearls: "Перлини", loot: "ВАШІ ТРОФЕЇ", goods: "ТОВАРИ", age: "Вік", race: "Раса", activity: "Діяльність", bio: "Біографія",
+        unlocked: "Розблоковано", locked: "Заблоковано"
     },
     en: { 
         title: "WATERY AGONY", maps: "MAPS", chars: "HEROES", shop: "SHOP", 
         bestiary: "BESTIARY", back: "BACK", score: "Score", time: "Time", 
         victory: "STAGE CLEAR", next: "DIVE DEEPER", finish: "SURFACE", 
         diff: "DIFFICULTY", easy: "EASY", normal: "NORM", jaws: "JAWS", 
-        pearls: "Pearls", loot: "YOUR TROPHIES", goods: "GOODS"
+        pearls: "Pearls", loot: "YOUR TROPHIES", goods: "GOODS", age: "Age", race: "Race", activity: "Activity", bio: "Biography",
+        unlocked: "Unlocked", locked: "Locked"
+
     }
 };
 
@@ -48,12 +51,27 @@ const MAP_DATA = [
     }
 ];
 
-// --- 3. БЕСТІАРІЙ ---
+// --- КАТЕГОРІЇ БЕСТІАРІЮ ---
+const BESTIARY_CATEGORIES = {
+    mobs: { uk: "ПРОСТІ МОБИ", en: "SIMPLE MOBS" },
+    myth: { uk: "МІФОЛОГІЧНІ ІСТОТИ", en: "MYTHOLOGICAL CREATURES" },
+    cryptids: { uk: "КРИПТИДИ", en: "CRYPTIDS" }
+};
+
 const BESTIARY_DATA = [
-    { name: "Мегалодон", img: "assets/megalodon.png", desc: "Доісторична акула неймовірних розмірів." },
-    { name: "Кракен", img: "assets/kraken.png", desc: "Легендарний кальмар, що трощить кораблі." },
-    { name: "Мурена", img: "assets/moray_eel.png", desc: "Хижий вугор безодні. Дуже швидкий." },
-    { name: "Зла Русалка", img: "assets/evil_mermaid.png", desc: "Її спів заманює моряків на гострі рифи." }
+    // ПРОСТІ МОБИ
+    { id: 'shark', category: 'mobs', name: "Акули", img: "assets/shark_1.png", desc: "Звичайні хижаки, що відчувають кров за милі." },
+    { id: 'eel', category: 'mobs', name: "Мурена", img: "assets/moray_eel.png", desc: "Ховається в щілинах, атакує блискавично." },
+    { id: 'octopus', category: 'mobs', name: "Восьминіг", img: "assets/octopus.png", desc: "Розумний мисливець з вісьмома щупальцями." },
+    { id: 'ray', category: 'mobs', name: "Скат", img: "assets/stingray.png", desc: "Плаский вбивця, що маскується на дні." },
+
+    // МІФОЛОГІЧНІ ІСТОТИ
+    { id: 'mermaid', category: 'myth', name: "Зла Русалка", img: "assets/evil_mermaid.png", desc: "Сирена, чий спів веде до загибелі на рифах." },
+    { id: 'kraken', category: 'myth', name: "Кракен", img: "assets/kraken.png", desc: "Древній жах, здатний поглинути цілий флот." },
+
+    // КРИПТИДИ
+    { id: 'megalodon', category: 'cryptids', name: "Мегалодон", img: "assets/megalodon.png", desc: "Доісторичний хижак, що вважався вимерлим мільйони років." },
+    { id: 'unknown', category: 'cryptids', name: "???", img: "assets/ui_bg.png", desc: "У цих водах бачили щось набагато більше за Мегалодона. Попереду нові зустрічі..." }
 ];
 
 // --- 4. СКЛАДНІСТЬ ---
@@ -103,3 +121,60 @@ let gameState = {
 function saveGame() {
     localStorage.setItem('agony_save', JSON.stringify(playerProgress));
 }
+
+// --- ЛЕГЕНДИ ТА ЛОР ---
+const LEGENDS_TEXT = {
+    uk: {
+        oceans_curse: {
+            title: "ПРОКЛЯТТЯ СОЛОНОЇ КРОВІ",
+            text: `Колись океани були колискою життя, солодкими та чистими. Але в епоху Чорного Сонця, коли стародавні боги відвернулися від світу, відбувся Катаклізм. 
+            
+            Кажуть, що кров першого вампіра Асіеля потрапила в безодню, отруївши кожну краплю. Вода стала солоною від сліз потопельників і гіркою від прокляття безсмертя. 
+            
+            Відтоді океан — це не просто вода, а жива тюрма. Кожна акула, кожен вугор — це лише інструмент агонії, що карає тих, хто насмілився порушити спокій проклятих глибин. Безодня не просто топить, вона п'є твою душу.`
+        }
+    },
+    en: {
+        oceans_curse: {
+            title: "THE CURSE OF SALT BLOOD",
+            text: `Once, the oceans were the cradle of life, sweet and clear. But during the era of the Black Sun, when the ancient gods turned away, the Cataclysm occurred. 
+            
+            They say the blood of the first vampire, Asiel, fell into the abyss, poisoning every drop. The water became salty from the tears of the drowned and bitter from the curse of immortality. 
+            
+            Since then, the ocean is not just water, but a living prison. Every shark, every eel is merely an instrument of agony, punishing those who dare to disturb the peace of the cursed depths.`
+        }
+    }
+};
+
+const CHARACTER_DATA = [
+    { 
+        id: 1, 
+        name: { uk: "Стенлі Акуловбивця", en: "Stanley Sharkslayer" }, 
+        img: "assets/stanley.png", 
+        unlocked: true,
+        stats: {
+            age: { uk: "42 роки", en: "42 years" },
+            race: { uk: "Людина", en: "Human" },
+            activity: { uk: "Капітан / Мисливець", en: "Captain / Hunter" },
+            bio: { 
+                uk: "Втратив свою сім'ю під час атаки великої білої акули. Тепер він присвятив життя очищенню проклятих океанів від морських чудовиськ.",
+                en: "Lost his family during a Great White attack. Now he dedicated his life to purging the cursed oceans of sea monsters."
+            }
+        }
+    },
+    { 
+        id: 2, 
+        name: { uk: "Русалка (Міра)", en: "Mermaid (Mira)" }, 
+        img: "assets/mermaid.png", 
+        unlocked: false, // Відкривається після купівлі в крамниці
+        stats: {
+            age: { uk: "Невідомо (безсмертна)", en: "Unknown (immortal)" },
+            race: { uk: "Сирена безодні", en: "Abyss Siren" },
+            activity: { uk: "Хранителька секретів / Торговець", en: "Keeper of Secrets / Merchant" },
+            bio: { 
+                uk: "Колись була звичайною дівчиною, але прокляття Асіеля перетворило її на сирену. Вона допомагає Стенлі за перлини, сподіваючись викупити свою свободу.",
+                en: "Once a normal girl, but Asiel's curse turned her into a siren. She helps Stanley for pearls, hoping to buy her freedom."
+            }
+        }
+    }
+];

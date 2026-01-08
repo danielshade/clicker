@@ -106,6 +106,74 @@
             border-radius: 4px; cursor: pointer; font-weight: bold; color: #000;
         }
 
+        /* Заголовки категорій у бестіарії */
+.category-header {
+    color: var(--gold);
+    border-left: 4px solid var(--gold);
+    padding-left: 10px;
+    margin: 20px 0 10px 0;
+    text-align: left;
+    font-size: 18px;
+    background: rgba(255, 215, 0, 0.1);
+}
+
+/* Картка персонажа */
+.char-card {
+    position: relative;
+    background: rgba(0, 20, 40, 0.8) !important;
+    border: 2px solid var(--gold) !important;
+    margin-bottom: 20px;
+    padding: 20px;
+}
+
+.char-card p {
+    margin: 5px 0;
+}
+
+.char-card b {
+    color: var(--gold);
+}
+
+/* Стиль для заблокованого героя */
+.locked-char {
+    filter: grayscale(1) brightness(0.5);
+    pointer-events: none;
+}
+
+.lock-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+    background: rgba(0,0,0,0.4);
+    font-weight: bold;
+    text-shadow: 0 0 10px black;
+}
+
+/* Спеціальний стиль для картки в бестіарії */
+.bestiary-card {
+    display: flex;
+    align-items: center;
+    border-left: 2px solid transparent;
+    transition: 0.3s;
+}
+
+.bestiary-card:hover {
+    background: rgba(255, 215, 0, 0.1);
+    border-left: 2px solid var(--gold);
+    transform: translateX(5px);
+}
+
+/* Колір для криптидів */
+.category-header:nth-of-type(3) {
+    color: #ff4444;
+    border-left-color: #ff4444;
+    background: rgba(255, 68, 68, 0.1);
+}
+
         /* Стилізація скролбару */
         .scroll-list::-webkit-scrollbar { width: 6px; }
         .scroll-list::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
@@ -122,6 +190,19 @@
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-12px); }
         }
+
+        /* Стиль для легендарного сувою */
+         .scroll-visual {
+    background-image: linear-gradient(rgba(40, 30, 10, 0.9), rgba(20, 15, 5, 0.95)), url('assets/ui_bg.png') !important;
+    border-color: #c4a484 !important; /* Колір старого паперу */
+    box-shadow: 0 0 30px rgba(196, 164, 132, 0.5) !important;
+}
+
+.scroll-visual h2 {
+    font-family: 'Georgia', serif;
+    letter-spacing: 1px;
+    color: #f3e5ab !important; /* Кремовий колір тексту */
+}
 
     </style>
 </head>

@@ -66,24 +66,65 @@ function setDiff(d) {
 // --- 3. ПЕРСОНАЖІ ТА БЕСТІАРІЙ ---
 function showChars() {
     const T = TRANSLATIONS[gameState.lang];
-    renderer.innerHTML = `
-        <div class="menu-container">
-            <img src="assets/stanley.png" style="width:120px; border-radius:10px; border:2px solid gold; margin-bottom:10px;">
-            <h2>СТАНЛІ</h2>
-            <p>${gameState.lang === 'uk' ? 'Хоробрий капітан, що кинув виклик безодні.' : 'A brave captain who challenged the abyss.'}</p>
-            <button class="btn-blue" style="width:100%" onclick="showMain()">${T.back}</button>
-        </div>
-    `;
+    let html = `<h2>${T.chars}</h2><div class="scroll-list">`;
+
+    CHARACTER_DATA.forEach(char => {
+        const isUnlocked = char.unlocked || playerProgress.unlockedChars.includes(char.id);
+        const name = char.name[gameState.lang];
+        const stats = char.stats;
+
+        html += `
+            <div class="list-item char-card ${!isUnlocked ? 'locked-char' : ''}">
+                <div style="display:flex; gap:20px; align-items:flex-start;">
+                    <img src="${char.img}" style="width:120px; border:2px solid var(--gold); border-radius:10px;">
+                    <div style="text-align:left; font-size:14px;">
+                        <h3 style="color:var(--gold); margin:0 0 10px 0;">${name}</h3>
+                        <p><b>${T.age}:</b> ${stats.age[gameState.lang]}</p>
+                        <p><b>${T.race}:</b> ${stats.race[gameState.lang]}</p>
+                        <p><b>${T.activity}:</b> ${stats.activity[gameState.lang]}</p>
+                    </div>
+                </div>
+                <div style="text-align:left; margin-top:15px; border-top:1px solid rgba(255,215,0,0.3); padding-top:10px;">
+                    <p><b>${T.bio}:</b><br><small>${stats.bio[gameState.lang]}</small></p>
+                </div>
+                ${!isUnlocked ? `<div class="lock-overlay">🔒 ${T.locked}</div>` : ''}
+            </div>
+        `;
+    });
+
+    html += `</div><button class="btn-blue" style="width:100%" onclick="showMain()">${T.back}</button>`;
+    renderer.innerHTML = `<div class="menu-container" style="width:550px;">${html}</div>`;
 }
 
 function showBestiary() {
     const T = TRANSLATIONS[gameState.lang];
+    const catNames = BESTIARY_CATEGORIES;
+    
     let html = `<h2>${T.bestiary}</h2><div class="scroll-list">`;
-    BESTIARY_DATA.forEach(m => {
-        html += `<div class="list-item"><b>${m.name}</b><br><small>${m.desc}</small></div>`;
-    });
+
+    // Цикл по категоріях
+    for (let catKey in catNames) {
+        const categoryLabel = catNames[catKey][gameState.lang];
+        const categoryItems = BESTIARY_DATA.filter(item => item.category === catKey);
+
+        if (categoryItems.length > 0) {
+            html += `<h3 class="category-header">${categoryLabel}</h3>`;
+            categoryItems.forEach(m => {
+                html += `
+                    <div class="list-item bestiary-card">
+                        <img src="${m.img}" style="width:50px; height:50px; object-fit:contain; margin-right:15px;">
+                        <div>
+                            <b>${m.name}</b><br>
+                            <small>${m.desc}</small>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+    }
+
     html += `</div><button class="btn-blue" style="width:100%" onclick="showMain()">${T.back}</button>`;
-    renderer.innerHTML = `<div class="menu-container">${html}</div>`;
+    renderer.innerHTML = `<div class="menu-container" style="width:500px;">${html}</div>`;
 }
 
 // --- 4. КРАМНИЦЯ РУСАЛКИ ---
@@ -161,16 +202,42 @@ function buyItem(id, price) {
     }
 }
 
+// Оновлена функція вибору в свитку
 function showScrollChoice() {
     const T = TRANSLATIONS[gameState.lang];
     renderer.innerHTML = `
-        <div class="menu-container">
-            <h2 style="color:var(--gold)">${gameState.lang === 'uk' ? 'Свиток про...' : 'Scroll about...'}</h2>
+        <div class="menu-container scroll-visual">
+            <h2 style="color:var(--gold)">${gameState.lang === 'uk' ? 'Оберіть таємницю' : 'Choose a Mystery'}</h2>
             <div style="display:flex; flex-direction:column; gap:10px;">
-                <button class="btn-blue" onclick="alert('${gameState.lang === 'uk' ? 'Ви дізналися таємниці Мегалодона!' : 'Secrets of Megalodon revealed!'}'); showShop();">${gameState.lang === 'uk' ? 'Секрети Глибини' : 'Deep Secrets'}</button>
-                <button class="btn-blue" onclick="alert('${gameState.lang === 'uk' ? 'Ви дізналися історію Генрі Клауда!' : 'Henry Cloud\'s story revealed!'}'); showShop();">${gameState.lang === 'uk' ? 'Генрі Клауд' : 'Henry Cloud'}</button>
+                <button class="btn-blue" onclick="showLegendContent('oceans_curse')">
+                    ${gameState.lang === 'uk' ? 'Прокляття Океанів' : 'Curse of the Oceans'}
+                </button>
+                
+                <button class="btn-blue" onclick="alert('Генрі Клауд — офіцер Совиного Вию, що шукає спокуту...'); showShop();">
+                    ${gameState.lang === 'uk' ? 'Генрі Клауд' : 'Henry Cloud'}
+                </button>
+                
                 <button class="btn-blue" style="background:#444" onclick="showShop()">${T.back}</button>
             </div>
+        </div>
+    `;
+}
+
+// Функція для показу самого тексту легенди
+function showLegendContent(key) {
+    const legend = LEGENDS_TEXT[gameState.lang][key];
+    
+    renderer.innerHTML = `
+        <div class="menu-container scroll-visual" style="width: 500px;">
+            <h2 style="color:var(--gold); border-bottom: 1px solid var(--gold); padding-bottom: 10px;">
+                ${legend.title}
+            </h2>
+            <div class="scroll-list" style="text-align: justify; font-family: 'Georgia', serif; line-height: 1.6; font-size: 16px;">
+                <p>${legend.text.replace(/\n/g, '<br>')}</p>
+            </div>
+            <button class="btn-blue" style="width:100%" onclick="showShop()">
+                ${gameState.lang === 'uk' ? 'ЗАКРИТИ СУВІЙ' : 'CLOSE SCROLL'}
+            </button>
         </div>
     `;
 }
