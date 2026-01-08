@@ -3,48 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Водяна Агонія 3.2</title>
+    <title>Водяна Агонія: Шлях Додому</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Creepster&display=swap');
-        :root { --main-red: #ff4848; --dark-red: #a01c1c; --border-color: #0a203e; --text-light: #fff; --hp-color: #32cd32; --text-dark: #2c1e14; --panel-border: #5a3d2b; }
-        body { font-family: 'Creepster', cursive; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-image: url('assets/background.jpg'); background-size: cover; background-position: center; color: var(--main-red); overflow: hidden; cursor: url('assets/anchor.png'), auto; }
-        #gameContainer { width: 90vw; height: 80vh; max-width: 1000px; max-height: 700px; border: 5px solid var(--border-color); background-color: rgba(0, 0, 0, 0.4); position: relative; box-shadow: 0 0 30px rgba(0, 0, 0, 0.7); transition: background-image 0.5s ease-in-out; overflow: hidden; }
         
-        /* backgrounds */
+        :root { 
+            --main-red: #ff4848; 
+            --dark-red: #a01c1c; 
+            --border-color: #0a203e; 
+            --text-light: #fff; 
+            --hp-color: #32cd32; 
+            --text-dark: #ece5d8; /* Genshin style text */
+            --panel-border: #5a3d2b;
+            --genshin-gold: #ece5d8;
+        }
+
+        body { 
+            font-family: 'Creepster', cursive; 
+            display: flex; justify-content: center; align-items: center; 
+            height: 100vh; margin: 0; 
+            background-image: url('assets/background.jpg'); 
+            background-size: cover; background-position: center; 
+            color: var(--main-red); overflow: hidden; 
+            cursor: url('assets/anchor.png'), auto; 
+        }
+
+        #gameContainer { 
+            width: 90vw; height: 80vh; max-width: 1000px; max-height: 700px; 
+            border: 5px solid var(--border-color); background-color: rgba(0, 0, 0, 0.4); 
+            position: relative; box-shadow: 0 0 30px rgba(0,0,0,0.7); 
+            transition: background-image 0.5s ease-in-out; overflow: hidden; 
+        }
+
+        /* Backgrounds */
         .bg-kings-coast { background-image: url('assets/background.jpg'); }
         .bg-abyss { background-image: url('assets/abyss_bg.jpg'); }
+        .bg-kraken { background-image: url('assets/kraken_bg.jpg'); }
         .bg-corals-despair { background-image: url('assets/corals_despair_bg.jpg'); }
-        .bg-survival { background-color: #003366; background-image: radial-gradient(#004080 1px, transparent 1px); background-size: 40px 40px; }
+        .bg-corals-acceptance { background-image: url('assets/corals_acceptance_bg.jpg'); }
+        .bg-corals-abyss { background-image: url('assets/corals_abyss_bg.jpg'); }
+        .bg-survival { background-color: #001a33; background-image: radial-gradient(#003366 1px, transparent 1px); background-size: 50px 50px; }
 
-        .target { position: absolute; -webkit-user-drag: none; user-select: none; transition: transform 0.2s ease, opacity 0.3s ease; }
-        .target.dying { opacity: 0; transform: scale(0.8) rotate(-25deg); }
-        .finalboss { width: 250px; height: 250px; filter: drop-shadow(0 0 15px #ff4848); }
-        
-        /* Top-Down Elements */
-        #playerBoat { position: absolute; width: 60px; height: 100px; z-index: 70; pointer-events: none; transition: opacity 0.2s; }
-        .xp-item { position: absolute; width: 30px; height: 30px; z-index: 65; filter: drop-shadow(0 0 10px gold); }
-        .invulnerable { opacity: 0.5; }
+        /* Map Selection Navigation */
+        .map-nav-container {
+            display: flex; align-items: center; justify-content: center;
+            width: 100%; gap: 15px; margin: 20px 0;
+        }
 
-        #uiContainer { position: absolute; top: 10px; right: 15px; display: flex; justify-content: flex-end; align-items: center; gap: 20px; font-size: 36px; text-shadow: 2px 2px 5px #000; z-index: 50; }
-        #playerHealthDisplay { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); color: var(--hp-color); font-size: 36px; text-shadow: 2px 2px 5px #000; z-index: 50; }
-        
-        #inGameControls { position: absolute; bottom: 10px; left: 15px; z-index: 50; display: flex; gap: 10px; }
-        #inGameControls button { font-family: 'Creepster', cursive; font-size: 20px; padding: 5px 15px; background-color: rgba(160, 28, 28, 0.7); color: var(--text-light); border: 2px solid var(--main-red); border-radius: 8px; cursor: pointer; }
+        .map-viewport {
+            width: 750px; overflow: hidden; /* Обмежуємо видимість */
+            padding: 10px 0;
+        }
 
+        .map-container {
+            display: flex; gap: 20px; transition: transform 0.4s ease-out;
+            will-change: transform;
+        }
+
+        .map-item { 
+            flex: 0 0 220px; /* Фіксована ширина карти */
+            background: rgba(44, 30, 20, 0.85); border: 3px solid #d3bc8e; 
+            padding: 15px; border-radius: 12px; color: var(--text-dark);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-align: center;
+        }
+
+        .map-item h3 { margin: 0 0 10px 0; font-size: 20px; color: #f5f0e1; }
+        .map-item.locked { filter: grayscale(1); opacity: 0.5; }
+
+        .nav-arrow {
+            background: #d3bc8e; color: #3b3b3b; border: 2px solid #5a3d2b;
+            font-size: 30px; width: 50px; height: 50px; border-radius: 50%;
+            cursor: pointer; transition: 0.2s; z-index: 10;
+        }
+
+        .nav-arrow:hover { background: #fff; transform: scale(1.1); }
+        .nav-arrow:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        /* Global UI elements */
         .messageScreen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.9); display: flex; justify-content: center; align-items: center; text-align: center; z-index: 100; padding: 20px; box-sizing: border-box; }
-        .menu-panel { background-image: url('assets/ui_bg.png'); background-size: 100% 100%; padding: 30px 40px; border-radius: 15px; box-shadow: 0 0 25px rgba(0,0,0,0.5); max-width: 95%; color: var(--text-dark); display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        .menu-panel { background: rgba(0,0,0,0.6); padding: 40px; border-radius: 20px; border: 2px solid #d3bc8e; color: white; display: flex; flex-direction: column; align-items: center; }
         
-        .main-menu button { width: 300px; font-size: 28px; padding: 10px; margin: 5px; font-family: 'Creepster'; background: var(--dark-red); color: white; border: 2px solid var(--main-red); border-radius: 10px; cursor: pointer; }
-        .button-row { display: flex; gap: 10px; margin-top: 10px; }
-        .selected { background-color: var(--main-red) !important; box-shadow: 0 0 15px var(--main-red); }
-        .hidden { display: none !important; }
+        button { font-family: 'Creepster'; cursor: pointer; border-radius: 8px; transition: 0.2s; }
+        .btn-main { width: 280px; padding: 12px; font-size: 26px; background: #a01c1c; color: white; border: 2px solid #ff4848; margin-top: 10px; }
+        .btn-main:hover { background: #ff4848; }
 
-        #notification-panel { position: absolute; top: 20px; right: 20px; width: 300px; background-color: rgba(0,0,0,0.85); border: 3px solid var(--main-red); border-radius: 10px; padding: 15px; display: flex; align-items: center; gap: 15px; z-index: 101; opacity: 0; transition: opacity 0.5s ease; }
-        #notification-panel.show { opacity: 1; }
-        #notification-portrait { width: 60px; height: 60px; border-radius: 50%; }
+        #playerBoat { position: absolute; width: 60px; height: 100px; z-index: 70; pointer-events: none; transition: opacity 0.2s; }
+        .xp-item { position: absolute; width: 35px; height: 35px; z-index: 65; filter: drop-shadow(0 0 10px gold); }
+        .target { position: absolute; user-select: none; }
+        .invulnerable { opacity: 0.4; }
 
-        .bio-card { background: rgba(0,0,0,0.8); color: white; padding: 15px; border-radius: 10px; border: 2px solid var(--panel-border); width: 300px; }
-        .bio-card img { width: 100px; border-radius: 50%; }
+        #uiContainer { position: absolute; top: 15px; right: 15px; font-size: 32px; text-shadow: 2px 2px #000; z-index: 80; }
+        #playerHealthDisplay { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); color: var(--hp-color); font-size: 36px; z-index: 80; }
     </style>
 </head>
 <body>
@@ -58,310 +110,294 @@
             <div id="timerDisplay"></div>
         </div>
         <div id="playerHealthDisplay" class="hidden"></div>
-        <div id="inGameControls" class="hidden">
-            <button id="pauseButton">Пауза</button>
-            <button id="exitButton">Меню</button>
+        <div id="inGameControls" class="hidden" style="position:absolute; bottom:15px; left:15px; z-index:80;">
+            <button onclick="togglePause()" class="btn-main" style="width:120px; font-size:18px;">ПАУЗА</button>
+            <button onclick="location.reload()" class="btn-main" style="width:120px; font-size:18px; background:gray;">МЕНЮ</button>
         </div>
 
         <img id="playerBoat" class="hidden" src="assets/boat.png">
-        <div id="notification-panel" class="hidden">
-            <img id="notification-portrait" src="assets/stanley.png">
-            <p id="notification-text" style="color:white; margin:0; font-size:16px;"></p>
-        </div>
+        <img id="playerSubmarine" class="hidden" src="assets/submarine.png" style="position:absolute; width:80px;">
 
         <div id="mainMenuScreen" class="messageScreen">
-            <div class="menu-panel main-menu">
-                <h1>Водяна Агонія</h1>
-                <button id="startButton">Швидка Гра</button>
-                <button id="mapButton">Вибір Карти</button>
-                <button id="aboutButton">Персонажі</button>
-                <div class="button-row" id="lang-selector">
-                    <button data-lang="uk" class="selected" style="width:140px">Укр</button>
-                    <button data-lang="en" style="width:140px">En</button>
+            <div class="menu-panel">
+                <h1 style="font-size:60px; margin-bottom:20px;">ВОДЯНА АГОНІЯ</h1>
+                <button class="btn-main" onclick="selectMap(0)">ШВИДКА ГРА</button>
+                <button class="btn-main" onclick="openMapScreen()">МАПА СВІТУ</button>
+                <button class="btn-main" onclick="showScreen('about')">ПЕРСОНАЖІ</button>
+            </div>
+        </div>
+
+        <div id="mapScreen" class="messageScreen hidden">
+            <div class="menu-panel" style="width: 900px;">
+                <h2 style="font-size:40px;">ОБЕРИ РЕГІОН</h2>
+                
+                <div class="map-nav-container">
+                    <button class="nav-arrow" id="arrowLeft" onclick="moveMapScroll(-1)">&#10094;</button>
+                    
+                    <div class="map-viewport">
+                        <div class="map-container" id="mapList">
+                            <div class="map-item" id="map-0">
+                                <h3>Узбережжя Короля</h3>
+                                <button class="btn-main" style="width:100%; font-size:18px;" onclick="selectMap(0)">ГРАТИ</button>
+                            </div>
+                            <div class="map-item locked" id="map-1">
+                                <h3>Окови Безодні</h3>
+                                <button class="btn-main" style="width:100%; font-size:18px;" onclick="selectMap(1)" disabled>ГРАТИ</button>
+                            </div>
+                            <div class="map-item locked" id="map-2">
+                                <h3>Моторошні Корали</h3>
+                                <button class="btn-main" style="width:100%; font-size:18px;" onclick="selectMap(2)" disabled>ГРАТИ</button>
+                            </div>
+                            <div class="map-item locked" id="map-3">
+                                <h3>Шлях Додому</h3>
+                                <button class="btn-main" style="width:100%; font-size:18px;" onclick="selectMap(3)" disabled>ГРАТИ</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="nav-arrow" id="arrowRight" onclick="moveMapScroll(1)">&#10095;</button>
                 </div>
+
+                <button class="btn-main" style="background:gray; width:150px;" onclick="showScreen('mainMenu')">НАЗАД</button>
             </div>
         </div>
 
         <div id="setupScreen" class="messageScreen hidden">
             <div class="menu-panel">
-                <h2 id="setupTitle">Налаштування</h2>
-                <div class="button-row" id="difficulty-selector">
-                    <button data-diff="easy" class="selected">Легко</button>
-                    <button data-diff="normal">Середньо</button>
-                    <button data-diff="jaws">JAWS</button>
+                <h2>ОБЕРИ СКЛАДНІСТЬ</h2>
+                <div style="display:flex; gap:10px; margin:20px 0;">
+                    <button id="diff-easy" class="btn-main selected" style="width:100px; font-size:18px;" onclick="setDifficulty('easy')">ЛЕГКО</button>
+                    <button id="diff-normal" class="btn-main" style="width:100px; font-size:18px;" onclick="setDifficulty('normal')">НОРМ</button>
+                    <button id="diff-jaws" class="btn-main" style="width:100px; font-size:18px;" onclick="setDifficulty('jaws')">JAWS</button>
                 </div>
-                <button id="confirmStart" style="margin-top:20px; font-size:32px; padding:10px 40px; font-family:'Creepster'; background:green; color:white; border:none; border-radius:10px; cursor:pointer;">В БІЙ!</button>
-                <button id="backToMain" style="background:gray; border:none; color:white; padding:5px 20px; margin-top:10px; cursor:pointer;">Назад</button>
-            </div>
-        </div>
-
-        <div id="mapScreen" class="messageScreen hidden">
-            <div class="menu-panel">
-                <h2>Вибір Карти</h2>
-                <button class="map-sel" data-map="0">1. Узбережжя Короля</button>
-                <button class="map-sel" data-map="3">2. Виживання (NEW)</button>
-                <button id="mapBack" style="background:gray; border:none; color:white; padding:5px 20px; margin-top:10px; cursor:pointer;">Назад</button>
-            </div>
-        </div>
-
-        <div id="aboutScreen" class="messageScreen hidden">
-            <div class="menu-panel">
-                <h2>Персонажі</h2>
-                <div style="display:flex; gap:20px;">
-                    <div class="bio-card">
-                        <img src="assets/stanley.png">
-                        <h3>Стенлі</h3>
-                        <p>Старий пірат. Ненавидить акул.</p>
-                    </div>
-                    <div class="bio-card">
-                        <img src="assets/mermaid.png">
-                        <h3>Русалка</h3>
-                        <p>Торгує корисними речами.</p>
-                    </div>
-                </div>
-                <button id="aboutBack" style="margin-top:20px; cursor:pointer">Назад</button>
+                <button class="btn-main" style="background:green; font-size:32px;" onclick="startGame()">У ПЛАВАННЯ!</button>
             </div>
         </div>
 
         <div id="gameOverScreen" class="messageScreen hidden">
             <div class="menu-panel">
                 <h1 id="goTitle">ГРУ ЗАВЕРШЕНО</h1>
-                <p id="goMsg"></p>
-                <button id="restartBtn" style="font-size:28px; padding:10px; cursor:pointer">Спробувати знову</button>
+                <p id="goMsg" style="font-size:24px;"></p>
+                <button class="btn-main" onclick="location.reload()">В МЕНЮ</button>
+            </div>
+        </div>
+
+        <div id="aboutScreen" class="messageScreen hidden">
+            <div class="menu-panel">
+                <h2>ПЕРСОНАЖІ</h2>
+                <p style="font-size:20px; max-width:500px;">Тут будуть описи твоїх героїв у стилі Genshin...</p>
+                <button class="btn-main" onclick="showScreen('mainMenu')">НАЗАД</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Конфігурація карт
-        const MAPS = [
-            { name: "Узбережжя Короля", type: "clicker", bg: "bg-kings-coast", enemies: ['shark1','shark2'] },
-            { name: "Виживання", type: "topdown", bg: "bg-survival", enemies: ['shark1'] }
+        // --- DATA ---
+        const MAP_DATA = [
+            { id: 0, name: "Узбережжя Короля", type: "clicker", bg: "bg-kings-coast" },
+            { id: 1, name: "Окови Безодні", type: "clicker", bg: "bg-abyss" },
+            { id: 2, name: "Моторошні Корали", type: "clicker", bg: "bg-corals-despair" },
+            { id: 3, name: "Шлях Додому", type: "survival", bg: "bg-survival" }
         ];
 
         let state = {
             mapIdx: 0,
             diff: 'easy',
-            lang: 'uk',
             hp: 10,
             score: 0,
-            isPaused: false,
             active: false,
-            invulnerable: false,
+            paused: false,
+            invul: false,
+            scrollPos: 0, // Позиція прокрутки карт
             targets: [],
             xpItems: []
         };
 
-        const container = document.getElementById('gameContainer');
-        const boat = document.getElementById('playerBoat');
+        let saveData = JSON.parse(localStorage.getItem('wateryAgonySave')) || {
+            m1: true, m2: false, m3: false, m4: false
+        };
 
-        // Ініціалізація
-        document.querySelectorAll('[data-lang]').forEach(b => b.onclick = (e) => {
-            document.querySelector('#lang-selector .selected').classList.remove('selected');
-            e.target.classList.add('selected');
-            state.lang = e.target.dataset.lang;
-        });
-
-        document.querySelectorAll('[data-diff]').forEach(b => b.onclick = (e) => {
-            document.querySelector('#difficulty-selector .selected').classList.remove('selected');
-            e.target.classList.add('selected');
-            state.diff = e.target.dataset.diff;
-        });
-
-        document.getElementById('startButton').onclick = () => { state.mapIdx = 0; showScreen('setup'); };
-        document.getElementById('mapButton').onclick = () => showScreen('map');
-        document.querySelectorAll('.map-sel').forEach(b => b.onclick = (e) => { state.mapIdx = parseInt(e.target.dataset.map); if(state.mapIdx === 3) state.mapIdx = 1; showScreen('setup'); });
-        document.getElementById('confirmStart').onclick = startGame;
-        document.getElementById('backToMain').onclick = () => showScreen('mainMenu');
-        document.getElementById('mapBack').onclick = () => showScreen('mainMenu');
-        document.getElementById('aboutButton').onclick = () => showScreen('about');
-        document.getElementById('aboutBack').onclick = () => showScreen('mainMenu');
-        document.getElementById('exitButton').onclick = () => location.reload();
-        document.getElementById('restartBtn').onclick = () => location.reload();
-
+        // --- NAVIGATION ---
         function showScreen(id) {
             document.querySelectorAll('.messageScreen').forEach(s => s.classList.add('hidden'));
             document.getElementById(id + 'Screen').classList.remove('hidden');
         }
 
+        function openMapScreen() {
+            showScreen('map');
+            // Перевірка розблокованих карт
+            if(saveData.m2) unlockMap(1);
+            if(saveData.m3) unlockMap(2);
+            if(saveData.m4) unlockMap(3);
+            updateArrowState();
+        }
+
+        function unlockMap(idx) {
+            const el = document.getElementById('map-' + idx);
+            el.classList.remove('locked');
+            el.querySelector('button').disabled = false;
+        }
+
+        function moveMapScroll(dir) {
+            const container = document.getElementById('mapList');
+            const cardWidth = 240; // 220 ширина + 20 gap
+            const maxScroll = (MAP_DATA.length - 3) * cardWidth; // Видно по 3 карти за раз
+            
+            state.scrollPos += dir * cardWidth;
+            if(state.scrollPos < 0) state.scrollPos = 0;
+            if(state.scrollPos > maxScroll) state.scrollPos = maxScroll;
+            
+            container.style.transform = `translateX(-${state.scrollPos}px)`;
+            updateArrowState();
+        }
+
+        function updateArrowState() {
+            document.getElementById('arrowLeft').disabled = state.scrollPos <= 0;
+            const maxScroll = (MAP_DATA.length - 3) * 240;
+            document.getElementById('arrowRight').disabled = state.scrollPos >= maxScroll;
+        }
+
+        function setDifficulty(d) {
+            state.diff = d;
+            document.querySelectorAll('#difficulty-selector button').forEach(b => b.classList.remove('selected'));
+            document.getElementById('diff-' + d).classList.add('selected');
+        }
+
+        function selectMap(idx) {
+            state.mapIdx = idx;
+            showScreen('setup');
+        }
+
+        // --- GAME LOGIC ---
         function startGame() {
             showScreen('none');
             document.getElementById('uiContainer').classList.remove('hidden');
-            document.getElementById('inGameControls').classList.remove('hidden');
             document.getElementById('playerHealthDisplay').classList.remove('hidden');
+            document.getElementById('inGameControls').classList.remove('hidden');
+
+            const map = MAP_DATA[state.mapIdx];
+            document.getElementById('gameContainer').className = map.bg;
             
-            // Налаштування HP за твоїм запитом
+            // Налаштування HP
             if(state.diff === 'easy') state.hp = 15;
             else if(state.diff === 'normal') state.hp = 10;
             else state.hp = 5;
 
             state.score = 0;
             state.active = true;
-            
-            const currentMap = MAPS[state.mapIdx];
-            container.className = currentMap.bg;
+            updateUI();
 
-            if(currentMap.type === 'topdown') {
-                boat.classList.remove('hidden');
-                container.onmousemove = moveBoat;
+            if(map.type === 'survival') {
+                document.getElementById('playerBoat').classList.remove('hidden');
+                document.getElementById('gameContainer').onmousemove = (e) => {
+                    const rect = document.getElementById('gameContainer').getBoundingClientRect();
+                    document.getElementById('playerBoat').style.left = (e.clientX - rect.left - 30) + 'px';
+                    document.getElementById('playerBoat').style.top = (e.clientY - rect.top - 50) + 'px';
+                };
+                for(let i=0; i<6; i++) spawnPatrol();
                 spawnXP();
-                // Спавнимо патрульних акул
-                for(let i=0; i<5; i++) spawnPatrolShark();
             } else {
-                setInterval(spawnClickerEnemy, 1000);
+                setInterval(spawnClassic, 1500);
             }
 
-            updateUI();
             requestAnimationFrame(gameLoop);
         }
 
-        function moveBoat(e) {
-            if(!state.active || state.isPaused) return;
-            const rect = container.getBoundingClientRect();
-            let x = e.clientX - rect.left - 30;
-            let y = e.clientY - rect.top - 50;
-            boat.style.left = x + 'px';
-            boat.style.top = y + 'px';
+        function spawnPatrol() {
+            const el = document.createElement('img');
+            el.src = 'assets/shark_1.png';
+            el.className = 'target';
+            el.style.width = '80px';
+            const shark = { el, x: Math.random()*800, y: Math.random()*500, dir: 1, speed: 2+Math.random()*3 };
+            document.getElementById('gameContainer').appendChild(el);
+            state.targets.push(shark);
         }
 
         function spawnXP() {
-            if(!state.active) return;
-            const item = document.createElement('img');
-            item.src = 'assets/xp_item.png';
-            item.className = 'xp-item';
-            item.style.left = Math.random() * (container.clientWidth - 40) + 'px';
-            item.style.top = Math.random() * (container.clientHeight - 40) + 'px';
-            container.appendChild(item);
-            state.xpItems.push(item);
-        }
-
-        function spawnPatrolShark() {
-            const s = document.createElement('img');
-            s.src = 'assets/shark_1.png';
-            s.className = 'target';
-            s.style.width = '80px';
-            let horizontal = Math.random() > 0.5;
-            let pos = Math.random() * 500;
-            let dir = 1;
-            
-            const sharkObj = { 
-                el: s, 
-                x: horizontal ? 0 : pos, 
-                y: horizontal ? pos : 0, 
-                h: horizontal, 
-                dir: 1, 
-                speed: 2 + Math.random() * 3 
-            };
-            
-            container.appendChild(s);
-            state.targets.push(sharkObj);
-        }
-
-        function updateUI() {
-            document.getElementById('playerHealthDisplay').textContent = '❤️ ' + state.hp;
-            document.getElementById('scoreDisplay').textContent = 'XP: ' + state.score + ' / 20';
-            document.getElementById('levelDisplay').textContent = MAPS[state.mapIdx].name;
+            const el = document.createElement('img');
+            el.src = 'assets/xp_item.png';
+            el.className = 'xp-item';
+            el.style.left = Math.random()*900 + 'px';
+            el.style.top = Math.random()*600 + 'px';
+            document.getElementById('gameContainer').appendChild(el);
+            state.xpItems.push(el);
         }
 
         function gameLoop() {
-            if(!state.active || state.isPaused) return;
+            if(!state.active || state.paused) return;
 
-            // Рух акул
-            state.targets.forEach(s => {
-                if(s.h) {
+            if(MAP_DATA[state.mapIdx].type === 'survival') {
+                state.targets.forEach(s => {
                     s.x += s.speed * s.dir;
-                    if(s.x > container.clientWidth - 80 || s.x < 0) {
-                        s.dir *= -1;
-                        s.el.style.transform = s.dir === 1 ? '' : 'scaleX(-1)';
+                    if(s.x > 900 || s.x < 0) s.dir *= -1;
+                    s.el.style.left = s.x + 'px'; s.el.style.top = s.y + 'px';
+                    
+                    if(!state.invul && checkCollision(document.getElementById('playerBoat'), s.el)) {
+                        takeDamage();
                     }
-                } else {
-                    s.y += s.speed * s.dir;
-                    if(s.y > container.clientHeight - 80 || s.y < 0) {
-                        s.dir *= -1;
-                        s.el.style.transform = s.dir === 1 ? 'rotate(180deg)' : 'rotate(0deg)';
+                });
+
+                state.xpItems.forEach((xp, i) => {
+                    if(checkCollision(document.getElementById('playerBoat'), xp)) {
+                        xp.remove(); state.xpItems.splice(i, 1);
+                        state.score++; updateUI(); spawnXP();
+                        if(state.score >= 20) winGame();
                     }
-                }
-                s.el.style.left = s.x + 'px';
-                s.el.style.top = s.y + 'px';
-
-                // Колізія з кораблем
-                if(!state.invulnerable && isColliding(boat, s.el)) {
-                    takeDamage();
-                }
-            });
-
-            // Збір досвіду
-            state.xpItems.forEach((xp, index) => {
-                if(isColliding(boat, xp)) {
-                    xp.remove();
-                    state.xpItems.splice(index, 1);
-                    state.score++;
-                    updateUI();
-                    spawnXP();
-                    if(state.score >= 20) winGame();
-                }
-            });
+                });
+            }
 
             requestAnimationFrame(gameLoop);
         }
 
-        function isColliding(a, b) {
-            const r1 = a.getBoundingClientRect();
-            const r2 = b.getBoundingClientRect();
+        function checkCollision(a, b) {
+            const r1 = a.getBoundingClientRect(); const r2 = b.getBoundingClientRect();
             return !(r1.right < r2.left || r1.left > r2.right || r1.bottom < r2.top || r1.top > r2.bottom);
         }
 
         function takeDamage() {
-            state.hp--;
-            updateUI();
-            if(state.hp <= 0) return endGame(false);
-
-            state.invulnerable = true;
-            boat.classList.add('invulnerable');
+            state.hp--; updateUI();
+            if(state.hp <= 0) return endGame();
+            state.invul = true;
+            document.getElementById('playerBoat').classList.add('invulnerable');
             setTimeout(() => {
-                state.invulnerable = false;
-                boat.classList.remove('invulnerable');
+                state.invul = false;
+                document.getElementById('playerBoat').classList.remove('invulnerable');
             }, 2000);
+        }
+
+        function updateUI() {
+            document.getElementById('playerHealthDisplay').textContent = '❤️ ' + state.hp;
+            document.getElementById('scoreDisplay').textContent = 'Очки: ' + state.score;
+            document.getElementById('levelDisplay').textContent = MAP_DATA[state.mapIdx].name;
         }
 
         function winGame() {
             state.active = false;
             document.getElementById('goTitle').textContent = "ПЕРЕМОГА!";
-            document.getElementById('goMsg').textContent = "Корабель успішно пройшов небезпечні води!";
+            document.getElementById('goMsg').textContent = "Регіон пройдено успішно!";
             showScreen('gameOver');
         }
 
-        function endGame(win) {
+        function endGame() {
             state.active = false;
-            document.getElementById('goTitle').textContent = "КОРАБЕЛЬ ЗАТОНУВ";
-            document.getElementById('goMsg').textContent = "Акули виявилися сильнішими...";
+            document.getElementById('goTitle').textContent = "ПОРАЗКА";
+            document.getElementById('goMsg').textContent = "Акули виявилися спритнішими...";
             showScreen('gameOver');
         }
 
-        // Тимчасова функція для спавну ворогів у режимі клікера (для 1 карти)
-        function spawnClickerEnemy() {
-            if(MAPS[state.mapIdx].type !== 'clicker' || !state.active) return;
-            const enemy = document.createElement('img');
-            enemy.src = 'assets/shark_1.png';
-            enemy.className = 'target';
-            enemy.style.width = '100px';
-            enemy.style.left = '-120px';
-            enemy.style.top = Math.random() * (container.clientHeight - 100) + 'px';
-            enemy.onclick = () => { enemy.remove(); state.score++; updateUI(); };
-            container.appendChild(enemy);
-            
-            let pos = -120;
-            const anim = setInterval(() => {
-                if(!state.active) return clearInterval(anim);
-                pos += 3;
-                enemy.style.left = pos + 'px';
-                if(pos > container.clientWidth) {
-                    clearInterval(anim);
-                    enemy.remove();
-                    state.hp--;
-                    updateUI();
-                    if(state.hp <= 0) endGame(false);
-                }
+        // Заглушка для класичного режиму
+        function spawnClassic() {
+            if(!state.active || MAP_DATA[state.mapIdx].type !== 'clicker') return;
+            const el = document.createElement('img');
+            el.src = 'assets/shark_1.png';
+            el.className = 'target'; el.style.width = '100px';
+            el.style.left = '-100px'; el.style.top = Math.random()*500 + 'px';
+            el.onclick = () => { el.remove(); state.score++; updateUI(); if(state.score >= 15) winGame(); };
+            document.getElementById('gameContainer').appendChild(el);
+            let pos = -100;
+            const iv = setInterval(() => {
+                pos += 4; el.style.left = pos + 'px';
+                if(pos > 1100) { clearInterval(iv); el.remove(); state.hp--; updateUI(); if(state.hp <= 0) endGame(); }
             }, 20);
         }
     </script>
