@@ -3,61 +3,367 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Водяна Агонія</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Водяна Агонія 3.2</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Creepster&display=swap');
+        :root { --main-red: #ff4848; --dark-red: #a01c1c; --border-color: #0a203e; --text-light: #fff; --hp-color: #32cd32; --text-dark: #2c1e14; --panel-border: #5a3d2b; }
+        body { font-family: 'Creepster', cursive; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-image: url('assets/background.jpg'); background-size: cover; background-position: center; color: var(--main-red); overflow: hidden; cursor: url('assets/anchor.png'), auto; }
+        #gameContainer { width: 90vw; height: 80vh; max-width: 1000px; max-height: 700px; border: 5px solid var(--border-color); background-color: rgba(0, 0, 0, 0.4); position: relative; box-shadow: 0 0 30px rgba(0, 0, 0, 0.7); transition: background-image 0.5s ease-in-out; overflow: hidden; }
+        
+        /* backgrounds */
+        .bg-kings-coast { background-image: url('assets/background.jpg'); }
+        .bg-abyss { background-image: url('assets/abyss_bg.jpg'); }
+        .bg-corals-despair { background-image: url('assets/corals_despair_bg.jpg'); }
+        .bg-survival { background-color: #003366; background-image: radial-gradient(#004080 1px, transparent 1px); background-size: 40px 40px; }
+
+        .target { position: absolute; -webkit-user-drag: none; user-select: none; transition: transform 0.2s ease, opacity 0.3s ease; }
+        .target.dying { opacity: 0; transform: scale(0.8) rotate(-25deg); }
+        .finalboss { width: 250px; height: 250px; filter: drop-shadow(0 0 15px #ff4848); }
+        
+        /* Top-Down Elements */
+        #playerBoat { position: absolute; width: 60px; height: 100px; z-index: 70; pointer-events: none; transition: opacity 0.2s; }
+        .xp-item { position: absolute; width: 30px; height: 30px; z-index: 65; filter: drop-shadow(0 0 10px gold); }
+        .invulnerable { opacity: 0.5; }
+
+        #uiContainer { position: absolute; top: 10px; right: 15px; display: flex; justify-content: flex-end; align-items: center; gap: 20px; font-size: 36px; text-shadow: 2px 2px 5px #000; z-index: 50; }
+        #playerHealthDisplay { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); color: var(--hp-color); font-size: 36px; text-shadow: 2px 2px 5px #000; z-index: 50; }
+        
+        #inGameControls { position: absolute; bottom: 10px; left: 15px; z-index: 50; display: flex; gap: 10px; }
+        #inGameControls button { font-family: 'Creepster', cursive; font-size: 20px; padding: 5px 15px; background-color: rgba(160, 28, 28, 0.7); color: var(--text-light); border: 2px solid var(--main-red); border-radius: 8px; cursor: pointer; }
+
+        .messageScreen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.9); display: flex; justify-content: center; align-items: center; text-align: center; z-index: 100; padding: 20px; box-sizing: border-box; }
+        .menu-panel { background-image: url('assets/ui_bg.png'); background-size: 100% 100%; padding: 30px 40px; border-radius: 15px; box-shadow: 0 0 25px rgba(0,0,0,0.5); max-width: 95%; color: var(--text-dark); display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        
+        .main-menu button { width: 300px; font-size: 28px; padding: 10px; margin: 5px; font-family: 'Creepster'; background: var(--dark-red); color: white; border: 2px solid var(--main-red); border-radius: 10px; cursor: pointer; }
+        .button-row { display: flex; gap: 10px; margin-top: 10px; }
+        .selected { background-color: var(--main-red) !important; box-shadow: 0 0 15px var(--main-red); }
+        .hidden { display: none !important; }
+
+        #notification-panel { position: absolute; top: 20px; right: 20px; width: 300px; background-color: rgba(0,0,0,0.85); border: 3px solid var(--main-red); border-radius: 10px; padding: 15px; display: flex; align-items: center; gap: 15px; z-index: 101; opacity: 0; transition: opacity 0.5s ease; }
+        #notification-panel.show { opacity: 1; }
+        #notification-portrait { width: 60px; height: 60px; border-radius: 50%; }
+
+        .bio-card { background: rgba(0,0,0,0.8); color: white; padding: 15px; border-radius: 10px; border: 2px solid var(--panel-border); width: 300px; }
+        .bio-card img { width: 100px; border-radius: 50%; }
+    </style>
 </head>
 <body>
 
+    <audio id="victoryMusicMap1" src="assets/map1_victory.mp3"></audio>
+
     <div id="gameContainer">
-        <div id="uiContainer" class="hidden"></div>
+        <div id="uiContainer" class="hidden">
+            <div id="levelDisplay"></div>
+            <div id="scoreDisplay"></div>
+            <div id="timerDisplay"></div>
+        </div>
         <div id="playerHealthDisplay" class="hidden"></div>
-        <div id="inGameControls" class="hidden"></div>
-        <div id="stanley-notification" class="hidden"></div>
+        <div id="inGameControls" class="hidden">
+            <button id="pauseButton">Пауза</button>
+            <button id="exitButton">Меню</button>
+        </div>
+
+        <img id="playerBoat" class="hidden" src="assets/boat.png">
+        <div id="notification-panel" class="hidden">
+            <img id="notification-portrait" src="assets/stanley.png">
+            <p id="notification-text" style="color:white; margin:0; font-size:16px;"></p>
+        </div>
 
         <div id="mainMenuScreen" class="messageScreen">
             <div class="menu-panel main-menu">
-                <div id="userInfo" class="hidden">
-                    <p id="userEmail"></p>
-                    <button id="logoutButton"></button>
+                <h1>Водяна Агонія</h1>
+                <button id="startButton">Швидка Гра</button>
+                <button id="mapButton">Вибір Карти</button>
+                <button id="aboutButton">Персонажі</button>
+                <div class="button-row" id="lang-selector">
+                    <button data-lang="uk" class="selected" style="width:140px">Укр</button>
+                    <button data-lang="en" style="width:140px">En</button>
                 </div>
-                <h1 id="gameTitle"></h1>
-                <button id="startButton" disabled></button>
-                <button id="mapButton" disabled></button>
-                <button id="mainMenuShopButton" disabled></button>
-                <button id="authButton"></button> <div class="button-row" id="lang-selector">
-                    <button data-lang="uk" class="selected">Українська</button>
-                    <button data-lang="en">English</button>
-                </div>
-            </div>
-        </div>
-        
-        <div id="authScreen" class="messageScreen hidden">
-            <div class="menu-panel auth-menu">
-                <div class="auth-tabs">
-                    <button id="loginTab" class="auth-tab selected"></button>
-                    <button id="registerTab" class="auth-tab"></button>
-                </div>
-                <div class="auth-form">
-                    <input type="email" id="authEmail" placeholder="Email">
-                    <input type="password" id="authPassword" placeholder="Пароль">
-                    <p id="authError" class="hidden"></p>
-                    <button id="authSubmitButton"></button>
-                </div>
-                <button id="authBackButton"></button>
             </div>
         </div>
 
-        <div id="setupScreen" class="messageScreen hidden"></div>
-        <div id="mapScreen" class="messageScreen hidden"></div>
-        <div id="pauseScreen" class="messageScreen hidden"></div>
-        <div id="gameOverScreen" class="messageScreen hidden"></div>
-        <div id="shopScreen" class="messageScreen hidden"></div>
+        <div id="setupScreen" class="messageScreen hidden">
+            <div class="menu-panel">
+                <h2 id="setupTitle">Налаштування</h2>
+                <div class="button-row" id="difficulty-selector">
+                    <button data-diff="easy" class="selected">Легко</button>
+                    <button data-diff="normal">Середньо</button>
+                    <button data-diff="jaws">JAWS</button>
+                </div>
+                <button id="confirmStart" style="margin-top:20px; font-size:32px; padding:10px 40px; font-family:'Creepster'; background:green; color:white; border:none; border-radius:10px; cursor:pointer;">В БІЙ!</button>
+                <button id="backToMain" style="background:gray; border:none; color:white; padding:5px 20px; margin-top:10px; cursor:pointer;">Назад</button>
+            </div>
+        </div>
+
+        <div id="mapScreen" class="messageScreen hidden">
+            <div class="menu-panel">
+                <h2>Вибір Карти</h2>
+                <button class="map-sel" data-map="0">1. Узбережжя Короля</button>
+                <button class="map-sel" data-map="3">2. Виживання (NEW)</button>
+                <button id="mapBack" style="background:gray; border:none; color:white; padding:5px 20px; margin-top:10px; cursor:pointer;">Назад</button>
+            </div>
+        </div>
+
+        <div id="aboutScreen" class="messageScreen hidden">
+            <div class="menu-panel">
+                <h2>Персонажі</h2>
+                <div style="display:flex; gap:20px;">
+                    <div class="bio-card">
+                        <img src="assets/stanley.png">
+                        <h3>Стенлі</h3>
+                        <p>Старий пірат. Ненавидить акул.</p>
+                    </div>
+                    <div class="bio-card">
+                        <img src="assets/mermaid.png">
+                        <h3>Русалка</h3>
+                        <p>Торгує корисними речами.</p>
+                    </div>
+                </div>
+                <button id="aboutBack" style="margin-top:20px; cursor:pointer">Назад</button>
+            </div>
+        </div>
+
+        <div id="gameOverScreen" class="messageScreen hidden">
+            <div class="menu-panel">
+                <h1 id="goTitle">ГРУ ЗАВЕРШЕНО</h1>
+                <p id="goMsg"></p>
+                <button id="restartBtn" style="font-size:28px; padding:10px; cursor:pointer">Спробувати знову</button>
+            </div>
+        </div>
     </div>
-    
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    
-    <script src="script.js" defer></script>
+
+    <script>
+        // Конфігурація карт
+        const MAPS = [
+            { name: "Узбережжя Короля", type: "clicker", bg: "bg-kings-coast", enemies: ['shark1','shark2'] },
+            { name: "Виживання", type: "topdown", bg: "bg-survival", enemies: ['shark1'] }
+        ];
+
+        let state = {
+            mapIdx: 0,
+            diff: 'easy',
+            lang: 'uk',
+            hp: 10,
+            score: 0,
+            isPaused: false,
+            active: false,
+            invulnerable: false,
+            targets: [],
+            xpItems: []
+        };
+
+        const container = document.getElementById('gameContainer');
+        const boat = document.getElementById('playerBoat');
+
+        // Ініціалізація
+        document.querySelectorAll('[data-lang]').forEach(b => b.onclick = (e) => {
+            document.querySelector('#lang-selector .selected').classList.remove('selected');
+            e.target.classList.add('selected');
+            state.lang = e.target.dataset.lang;
+        });
+
+        document.querySelectorAll('[data-diff]').forEach(b => b.onclick = (e) => {
+            document.querySelector('#difficulty-selector .selected').classList.remove('selected');
+            e.target.classList.add('selected');
+            state.diff = e.target.dataset.diff;
+        });
+
+        document.getElementById('startButton').onclick = () => { state.mapIdx = 0; showScreen('setup'); };
+        document.getElementById('mapButton').onclick = () => showScreen('map');
+        document.querySelectorAll('.map-sel').forEach(b => b.onclick = (e) => { state.mapIdx = parseInt(e.target.dataset.map); if(state.mapIdx === 3) state.mapIdx = 1; showScreen('setup'); });
+        document.getElementById('confirmStart').onclick = startGame;
+        document.getElementById('backToMain').onclick = () => showScreen('mainMenu');
+        document.getElementById('mapBack').onclick = () => showScreen('mainMenu');
+        document.getElementById('aboutButton').onclick = () => showScreen('about');
+        document.getElementById('aboutBack').onclick = () => showScreen('mainMenu');
+        document.getElementById('exitButton').onclick = () => location.reload();
+        document.getElementById('restartBtn').onclick = () => location.reload();
+
+        function showScreen(id) {
+            document.querySelectorAll('.messageScreen').forEach(s => s.classList.add('hidden'));
+            document.getElementById(id + 'Screen').classList.remove('hidden');
+        }
+
+        function startGame() {
+            showScreen('none');
+            document.getElementById('uiContainer').classList.remove('hidden');
+            document.getElementById('inGameControls').classList.remove('hidden');
+            document.getElementById('playerHealthDisplay').classList.remove('hidden');
+            
+            // Налаштування HP за твоїм запитом
+            if(state.diff === 'easy') state.hp = 15;
+            else if(state.diff === 'normal') state.hp = 10;
+            else state.hp = 5;
+
+            state.score = 0;
+            state.active = true;
+            
+            const currentMap = MAPS[state.mapIdx];
+            container.className = currentMap.bg;
+
+            if(currentMap.type === 'topdown') {
+                boat.classList.remove('hidden');
+                container.onmousemove = moveBoat;
+                spawnXP();
+                // Спавнимо патрульних акул
+                for(let i=0; i<5; i++) spawnPatrolShark();
+            } else {
+                setInterval(spawnClickerEnemy, 1000);
+            }
+
+            updateUI();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function moveBoat(e) {
+            if(!state.active || state.isPaused) return;
+            const rect = container.getBoundingClientRect();
+            let x = e.clientX - rect.left - 30;
+            let y = e.clientY - rect.top - 50;
+            boat.style.left = x + 'px';
+            boat.style.top = y + 'px';
+        }
+
+        function spawnXP() {
+            if(!state.active) return;
+            const item = document.createElement('img');
+            item.src = 'assets/xp_item.png';
+            item.className = 'xp-item';
+            item.style.left = Math.random() * (container.clientWidth - 40) + 'px';
+            item.style.top = Math.random() * (container.clientHeight - 40) + 'px';
+            container.appendChild(item);
+            state.xpItems.push(item);
+        }
+
+        function spawnPatrolShark() {
+            const s = document.createElement('img');
+            s.src = 'assets/shark_1.png';
+            s.className = 'target';
+            s.style.width = '80px';
+            let horizontal = Math.random() > 0.5;
+            let pos = Math.random() * 500;
+            let dir = 1;
+            
+            const sharkObj = { 
+                el: s, 
+                x: horizontal ? 0 : pos, 
+                y: horizontal ? pos : 0, 
+                h: horizontal, 
+                dir: 1, 
+                speed: 2 + Math.random() * 3 
+            };
+            
+            container.appendChild(s);
+            state.targets.push(sharkObj);
+        }
+
+        function updateUI() {
+            document.getElementById('playerHealthDisplay').textContent = '❤️ ' + state.hp;
+            document.getElementById('scoreDisplay').textContent = 'XP: ' + state.score + ' / 20';
+            document.getElementById('levelDisplay').textContent = MAPS[state.mapIdx].name;
+        }
+
+        function gameLoop() {
+            if(!state.active || state.isPaused) return;
+
+            // Рух акул
+            state.targets.forEach(s => {
+                if(s.h) {
+                    s.x += s.speed * s.dir;
+                    if(s.x > container.clientWidth - 80 || s.x < 0) {
+                        s.dir *= -1;
+                        s.el.style.transform = s.dir === 1 ? '' : 'scaleX(-1)';
+                    }
+                } else {
+                    s.y += s.speed * s.dir;
+                    if(s.y > container.clientHeight - 80 || s.y < 0) {
+                        s.dir *= -1;
+                        s.el.style.transform = s.dir === 1 ? 'rotate(180deg)' : 'rotate(0deg)';
+                    }
+                }
+                s.el.style.left = s.x + 'px';
+                s.el.style.top = s.y + 'px';
+
+                // Колізія з кораблем
+                if(!state.invulnerable && isColliding(boat, s.el)) {
+                    takeDamage();
+                }
+            });
+
+            // Збір досвіду
+            state.xpItems.forEach((xp, index) => {
+                if(isColliding(boat, xp)) {
+                    xp.remove();
+                    state.xpItems.splice(index, 1);
+                    state.score++;
+                    updateUI();
+                    spawnXP();
+                    if(state.score >= 20) winGame();
+                }
+            });
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function isColliding(a, b) {
+            const r1 = a.getBoundingClientRect();
+            const r2 = b.getBoundingClientRect();
+            return !(r1.right < r2.left || r1.left > r2.right || r1.bottom < r2.top || r1.top > r2.bottom);
+        }
+
+        function takeDamage() {
+            state.hp--;
+            updateUI();
+            if(state.hp <= 0) return endGame(false);
+
+            state.invulnerable = true;
+            boat.classList.add('invulnerable');
+            setTimeout(() => {
+                state.invulnerable = false;
+                boat.classList.remove('invulnerable');
+            }, 2000);
+        }
+
+        function winGame() {
+            state.active = false;
+            document.getElementById('goTitle').textContent = "ПЕРЕМОГА!";
+            document.getElementById('goMsg').textContent = "Корабель успішно пройшов небезпечні води!";
+            showScreen('gameOver');
+        }
+
+        function endGame(win) {
+            state.active = false;
+            document.getElementById('goTitle').textContent = "КОРАБЕЛЬ ЗАТОНУВ";
+            document.getElementById('goMsg').textContent = "Акули виявилися сильнішими...";
+            showScreen('gameOver');
+        }
+
+        // Тимчасова функція для спавну ворогів у режимі клікера (для 1 карти)
+        function spawnClickerEnemy() {
+            if(MAPS[state.mapIdx].type !== 'clicker' || !state.active) return;
+            const enemy = document.createElement('img');
+            enemy.src = 'assets/shark_1.png';
+            enemy.className = 'target';
+            enemy.style.width = '100px';
+            enemy.style.left = '-120px';
+            enemy.style.top = Math.random() * (container.clientHeight - 100) + 'px';
+            enemy.onclick = () => { enemy.remove(); state.score++; updateUI(); };
+            container.appendChild(enemy);
+            
+            let pos = -120;
+            const anim = setInterval(() => {
+                if(!state.active) return clearInterval(anim);
+                pos += 3;
+                enemy.style.left = pos + 'px';
+                if(pos > container.clientWidth) {
+                    clearInterval(anim);
+                    enemy.remove();
+                    state.hp--;
+                    updateUI();
+                    if(state.hp <= 0) endGame(false);
+                }
+            }, 20);
+        }
+    </script>
 </body>
 </html>
