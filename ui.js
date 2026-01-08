@@ -202,7 +202,6 @@ function buyItem(id, price) {
     }
 }
 
-// Оновлена функція вибору в свитку
 function showScrollChoice() {
     const T = TRANSLATIONS[gameState.lang];
     renderer.innerHTML = `
@@ -213,8 +212,8 @@ function showScrollChoice() {
                     ${gameState.lang === 'uk' ? 'Прокляття Океанів' : 'Curse of the Oceans'}
                 </button>
                 
-                <button class="btn-blue" onclick="alert('Генрі Клауд — офіцер Совиного Вию, що шукає спокуту...'); showShop();">
-                    ${gameState.lang === 'uk' ? 'Генрі Клауд' : 'Henry Cloud'}
+                <button class="btn-blue" onclick="showLegendContent('guardian_legend')">
+                    ${gameState.lang === 'uk' ? 'Страж Лагуни' : 'Guardian of Lagoon'}
                 </button>
                 
                 <button class="btn-blue" style="background:#444" onclick="showShop()">${T.back}</button>
@@ -222,6 +221,8 @@ function showScrollChoice() {
         </div>
     `;
 }
+
+// Функція showLegendContent сама підтягне текст із data.js за ключем 'guardian_legend'
 
 // Функція для показу самого тексту легенди
 function showLegendContent(key) {

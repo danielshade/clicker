@@ -159,23 +159,21 @@ function winStage() {
 
     const stage = MAP_DATA[gameState.mapId].stages[gameState.stageIdx];
 
-    // СИСТЕМА ЛЕГЕНДАРНОГО ЛУТУ
     if (stage.boss) {
         let lootKey = null;
-        if (gameState.mapId === 0) lootKey = 'tooth';    // 1 мапа - Зуб
-        if (gameState.mapId === 1) lootKey = 'tentacle'; // 2 мапа - Щупальце
-        if (gameState.mapId === 2) lootKey = 'tongue';   // 3 мапа - Язик
+        if (gameState.mapId === 0) lootKey = 'tooth';
+        if (gameState.mapId === 1) lootKey = 'tentacle';
+        if (gameState.mapId === 2) lootKey = 'tongue';
+        if (gameState.mapId === 3) lootKey = 'shell'; // НОВИЙ ТРОФЕЙ
 
         if (lootKey) {
             playerProgress.inventory.push(lootKey);
             alert(`${gameState.lang === 'uk' ? 'Отримано:' : 'Obtained:'} ${LEGENDARY_ITEMS[lootKey].name}`);
         }
-
-        // РОЗБЛОКУВАННЯ КРАМНИЦІ
-        // Умова: Перемога над Кракеном (мапа id 1) на Normal
+        
+        // Перевірка на Кракена (залишається як була)
         if (gameState.mapId === 1 && gameState.difficulty === 'normal') {
             playerProgress.shopUnlocked = true;
-            alert(gameState.lang === 'uk' ? "Крамниця Русалки тепер відкрита!" : "Mermaid's Shop is now unlocked!");
         }
     }
 

@@ -48,7 +48,17 @@ const MAP_DATA = [
             { id: 2, name: "Гострі рифи", bg: "assets/corals_acceptance_bg.png", enemies: ['white_shark.png'], boss: null },
             { id: 3, name: "Гніздо Русалки", bg: "assets/corals_despair_bg.png", enemies: [], boss: "evil_mermaid.png" }
         ]
-    }
+    },
+    { 
+    id: 3, name: "Лихо у Тумані", 
+    stages: [
+        { id: 1, name: "Болото", bg: "assets/swamp_bg.png", enemies: ['snake.png', 'bat.png'], boss: null },
+        { id: 2, name: "Довга Ріка", bg: "assets/long_river_bg.png", enemies: ['crocodile.png'], boss: null },
+        { id: 3, name: "Мертва Лагуна", bg: "assets/dead_lagoon_bg.png", enemies: [], boss: "giant_turtle.png" }
+    ]
+},
+
+    
 ];
 
 // --- КАТЕГОРІЇ БЕСТІАРІЮ ---
@@ -71,7 +81,12 @@ const BESTIARY_DATA = [
 
     // КРИПТИДИ
     { id: 'megalodon', category: 'cryptids', name: "Мегалодон", img: "assets/megalodon.png", desc: "Доісторичний хижак, що вважався вимерлим мільйони років." },
-    { id: 'unknown', category: 'cryptids', name: "???", img: "assets/ui_bg.png", desc: "У цих водах бачили щось набагато більше за Мегалодона. Попереду нові зустрічі..." }
+    { id: 'unknown', category: 'cryptids', name: "???", img: "assets/ui_bg.png", desc: "У цих водах бачили щось набагато більше за Мегалодона. Попереду нові зустрічі..." },
+
+    { id: 'snake', category: 'mobs', name: "Болотяна змія", img: "assets/snake.png", desc: "Тихий вбивця, що ховається у рясці." },
+    { id: 'bat', category: 'mobs', name: "Кажани-кровосісі", img: "assets/bat.png", desc: "Зграї, що атакують з туману." },
+    { id: 'croc', category: 'mobs', name: "Крокодил", img: "assets/crocodile.png", desc: "Стародавній хижак річкових глибин." },
+    { id: 'turtle', category: 'myth', name: "Гігантська зла черепаха", img: "assets/giant_turtle.png", desc: "Проклятий страж Лагуни, чий панцир міцніший за сталь." },
 ];
 
 // --- 4. СКЛАДНІСТЬ ---
@@ -85,7 +100,8 @@ const DIFFICULTY_SETTINGS = {
 const LEGENDARY_ITEMS = {
     'tooth':    { name: "Зуб Мегалодона", price: 10, img: "assets/megalodon_tooth.png" },
     'tentacle': { name: "Щупальце Кракена", price: 10, img: "assets/kraken_tentacle.png" },
-    'tongue':   { name: "Язик Сирени", price: 10, img: "assets/siren_tongue.png" }
+    'tongue':   { name: "Язик Сирени", price: 10, img: "assets/siren_tongue.png" },
+    'shell': { name: "Шматок панцира", price: 10, img: "assets/turtle_shell.png" },
 };
 
 // --- 6. ТОВАРИ У КРАМНИЦІ ---
@@ -143,7 +159,18 @@ const LEGENDS_TEXT = {
             
             Since then, the ocean is not just water, but a living prison. Every shark, every eel is merely an instrument of agony, punishing those who dare to disturb the peace of the cursed depths.`
         }
+    },
+
+    guardian_legend: {
+    uk: {
+        title: "ПРОКЛЯТИЙ СТРАЖ ЛАГУНИ",
+        text: "Кажуть, ця черепаха була священною істотою, доки туман не отруїв її розум. Тепер вона стереже Мертву Лагуну, не пускаючи нікого до витоків річки."
+    },
+    en: {
+        title: "CURSED GUARDIAN OF THE LAGOON",
+        text: "They say this turtle was a sacred creature until the mist poisoned its mind. Now it guards the Dead Lagoon, letting no one near the river's source."
     }
+}
 };
 
 const CHARACTER_DATA = [
