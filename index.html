@@ -5,62 +5,145 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Водяна Агонія: Шлях Додому</title>
     <style>
-        :root { --gold: #ffd700; --deep-blue: rgba(0, 15, 35, 0.95); --red: #ff4444; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Segoe UI', Arial, sans-serif; color: white; }
+        /* --- 1. ГЛОБАЛЬНІ СТИЛІ --- */
+        :root { 
+            --gold: #ffd700; 
+            --deep-blue: rgba(0, 15, 35, 0.95); 
+            --red: #ff4444; 
+            --green: #2ecc71;
+        }
+
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            overflow: hidden; background: #000; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white; 
+        }
+
+        #gameContainer { 
+            position: relative; width: 100vw; height: 100vh; 
+            background-color: #001020; background-size: cover; 
+            background-position: center; transition: background 0.8s ease; 
+        }
+
+        /* --- 2. HUD (ГЕЙМПЛЕЙНИЙ ІНТЕРФЕЙС) --- */
+        #hud { 
+            position: absolute; top: 20px; width: 100%; 
+            display: flex; justify-content: center; gap: 20px; 
+            z-index: 80; pointer-events: none; 
+        }
+
+        .hud-item { 
+            background: rgba(0,0,0,0.8); border: 2px solid var(--gold); 
+            padding: 8px 20px; border-radius: 12px; 
+            font-size: 20px; font-weight: bold; box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+        }
+
+        #playerHealthDisplay { position: absolute; bottom: 20px; left: 20px; z-index: 80; }
         
-        #gameContainer { position: relative; width: 100vw; height: 100vh; background-color: #001020; background-size: cover; background-position: center; transition: background 0.8s ease; }
-        
-        #screen-renderer { position: absolute; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; }
-        
+        .heart-panel { 
+            background: rgba(0,0,0,0.8); border: 2px solid var(--red); 
+            padding: 10px 20px; border-radius: 15px; font-size: 24px; 
+            box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
+        }
+
+        /* --- 3. UI ТА МЕНЮ --- */
+        #screen-renderer { 
+            position: absolute; inset: 0; z-index: 100; 
+            display: flex; align-items: center; justify-content: center; 
+        }
+
         .menu-container { 
             background: var(--deep-blue); 
-            /* Використовуємо ui_bg для фону меню */
-            background-image: linear-gradient(rgba(0,15,35,0.8), rgba(0,15,35,0.8)), url('assets/ui_bg.png');
-            background-size: cover;
+            background-image: linear-gradient(rgba(0,15,35,0.85), rgba(0,15,35,0.85)), url('assets/ui_bg.png');
+            background-size: cover; background-position: center;
             padding: 40px; border: 3px solid var(--gold); border-radius: 25px; 
-            box-shadow: 0 0 40px rgba(255, 215, 0, 0.2); text-align: center; width: 450px; position: relative;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.3); text-align: center; 
+            width: 450px; position: relative;
         }
 
-        .game-title { color: var(--gold); font-size: 42px; margin-bottom: 5px; text-shadow: 0 0 15px var(--gold); }
-        .button-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-        
-        .btn-blue { 
-            background: linear-gradient(145deg, #0044cc, #002266); color: white; border: 1px solid var(--gold); 
-            padding: 15px; font-size: 16px; cursor: pointer; border-radius: 10px; transition: 0.3s;
+        .game-title { 
+            color: var(--gold); font-size: 42px; margin-bottom: 10px; 
+            text-shadow: 0 0 15px var(--gold); letter-spacing: 2px;
         }
+
+        .button-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+
+        .btn-blue { 
+            background: linear-gradient(145deg, #0044cc, #002266); 
+            color: white; border: 1px solid var(--gold); 
+            padding: 15px; font-size: 16px; font-weight: bold;
+            cursor: pointer; border-radius: 10px; transition: 0.3s;
+        }
+
         .btn-blue:hover { transform: scale(1.05); filter: brightness(1.2); box-shadow: 0 0 15px var(--gold); }
 
-        #hud { position: absolute; top: 20px; width: 100%; display: flex; justify-content: center; gap: 20px; z-index: 80; pointer-events: none; }
-        .hud-item { background: rgba(0,0,0,0.8); border: 2px solid var(--gold); padding: 8px 20px; border-radius: 12px; font-size: 20px; font-weight: bold; }
-        
-        #playerHealthDisplay { position: absolute; bottom: 20px; left: 20px; z-index: 80; }
-        .heart-panel { background: rgba(0,0,0,0.8); border: 2px solid var(--red); padding: 10px 20px; border-radius: 15px; font-size: 24px; }
+        .lang-switch { 
+            position: absolute; top: 15px; right: 15px; 
+            background: rgba(0,0,0,0.5); border: 1px solid var(--gold); 
+            color: var(--gold); padding: 5px 10px; cursor: pointer; border-radius: 5px; 
+        }
 
+        /* --- 4. КРАМНИЦЯ ТА СПИСКИ --- */
+        .shop-bg { 
+            border-color: var(--green) !important; 
+            box-shadow: 0 0 50px rgba(46, 204, 113, 0.3) !important;
+        }
+
+        .mermaid-seller { margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
+
+        .scroll-list { 
+            max-height: 250px; overflow-y: auto; 
+            margin: 20px 0; padding-right: 10px; 
+        }
+
+        .list-item { 
+            background: rgba(255,255,255,0.05); border: 1px solid var(--gold); 
+            border-radius: 8px; padding: 12px; margin-bottom: 10px; text-align: left; 
+        }
+
+        .btn-small {
+            background: #f1c40f; border: none; padding: 6px 12px; 
+            border-radius: 4px; cursor: pointer; font-weight: bold; color: #000;
+        }
+
+        /* Стилізація скролбару */
+        .scroll-list::-webkit-scrollbar { width: 6px; }
+        .scroll-list::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+        .scroll-list::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+
+        /* --- 5. ІГРОВІ ОБ'ЄКТИ --- */
         .target { position: absolute; width: 130px; cursor: crosshair; z-index: 50; }
-        .boss-img { width: 350px !important; z-index: 90; }
+        .boss-img { width: 350px !important; z-index: 90; filter: drop-shadow(0 0 20px red); }
         .dying { transform: scale(0); opacity: 0; transition: 0.4s; pointer-events: none; }
         .hidden { display: none !important; }
-        
-        .scroll-list { max-height: 250px; overflow-y: auto; margin: 20px 0; padding-right: 5px; }
-        .list-item { background: rgba(255,255,255,0.05); border: 1px solid var(--gold); border-radius: 8px; padding: 10px; margin-bottom: 8px; text-align: left; }
-        .lang-switch { position: absolute; top: 15px; right: 15px; background: none; border: 1px solid var(--gold); color: var(--gold); padding: 5px 10px; cursor: pointer; border-radius: 5px; }
+
+        /* --- АНІМАЦІЇ --- */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
     </style>
 </head>
 <body>
+
     <div id="gameContainer">
         <div id="hud" class="hidden">
             <div class="hud-item" id="hud-map-name"></div>
             <div class="hud-item" id="scoreDisplay"></div>
             <div class="hud-item" id="timerDisplay"></div>
         </div>
+
         <div id="playerHealthDisplay" class="hidden">
             <div class="heart-panel" id="heart-container"></div>
         </div>
+
         <div id="screen-renderer"></div>
     </div>
 
     <script src="data.js"></script>
     <script src="engine.js"></script>
     <script src="ui.js"></script>
+
 </body>
 </html>
