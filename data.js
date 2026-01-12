@@ -11,7 +11,10 @@ const TRANSLATIONS = {
         diff: "СКЛАДНІСТЬ", easy: "ЛЕГКО", normal: "НОРМ", jaws: "JAWS", 
         pearls: "Перлини", loot: "ВАШІ ТРОФЕЇ", goods: "ТОВАРИ", age: "Вік", 
         race: "Раса", activity: "Діяльність", bio: "Біографія",
-        unlocked: "Розблоковано", locked: "Заблоковано"
+        unlocked: "Розблоковано", locked: "Заблоковано",
+        invitation: "ЗАПРОШЕННЯ", invited_chars: "ЗАПРОШЕНІ ГЕРОЇ", 
+        roll: "ПОКРУТИТИ", buy: "КУПИТИ", black_sand: "Чорний Пісок", 
+        pause: "ПАУЗА", resume: "ПРОДОВЖИТИ", main_menu: "ГОЛОВНЕ МЕНЮ"
     },
     en: { 
         title: "WATERY AGONY", maps: "MAPS", chars: "HEROES", shop: "SHOP", 
@@ -20,7 +23,10 @@ const TRANSLATIONS = {
         diff: "DIFFICULTY", easy: "EASY", normal: "NORM", jaws: "JAWS", 
         pearls: "Pearls", loot: "YOUR TROPHIES", goods: "GOODS", age: "Age", 
         race: "Race", activity: "Activity", bio: "Biography",
-        unlocked: "Unlocked", locked: "Locked"
+        unlocked: "Unlocked", locked: "Locked",
+        invitation: "INVITATION", invited_chars: "INVITED HEROES", 
+        roll: "ROLL", buy: "BUY", black_sand: "Black Sand", 
+        pause: "PAUSE", resume: "RESUME", main_menu: "MAIN MENU"
     }
 };
 
@@ -124,17 +130,20 @@ const SHOP_ITEMS = [
 // --- 7. ПРОГРЕС ---
 let playerProgress = JSON.parse(localStorage.getItem('agony_save')) || {
     pearls: 0,
-    inventory: [],
-    shopUnlocked: false,
+    blackSand: 0,
+    unlockedChars: [1], // Стенлі за замовчуванням
     completedMaps: [],
     boughtWeapons: ['none'],
-    unlockedChars: [1]
+    shopUnlocked: false,
+    inventory: []
 };
 
 let gameState = {
     lang: 'uk', active: false, paused: false, score: 0, hp: 10, 
     killCount: 0, mapId: 0, stageIdx: 0, difficulty: 'easy', 
-    timeLeft: 60, bossActive: false, invul: false, weapon: 'none'
+    timeLeft: 60, bossActive: false, invul: false, weapon: 'none',
+    paused: false,
+    weapon: 'none'
 };
 
 function saveGame() {
@@ -175,26 +184,8 @@ const LEGENDS_TEXT = {
 
 // --- 9. ГЕРОЇ ---
 const CHARACTER_DATA = [
-    { 
-        id: 1, 
-        name: { uk: "Стенлі Акуловбивця", en: "Stanley Sharkslayer" }, 
-        img: "assets/stanley.png", unlocked: true,
-        stats: {
-            age: { uk: "42 роки", en: "42 years" },
-            race: { uk: "Людина", en: "Human" },
-            activity: { uk: "Капітан / Мисливець", en: "Captain / Hunter" },
-            bio: { uk: "Втратив сім'ю під час атаки акули. Присвятив життя помсті.", en: "Lost family to a shark attack. Dedicated life to revenge." }
-        }
-    },
-    { 
-        id: 2, 
-        name: { uk: "Русалка (Міра)", en: "Mermaid (Mira)" }, 
-        img: "assets/mermaid.png", unlocked: false,
-        stats: {
-            age: { uk: "Невідомо", en: "Unknown" },
-            race: { uk: "Сирена безодні", en: "Abyss Siren" },
-            activity: { uk: "Торговець", en: "Merchant" },
-            bio: { uk: "Прокляття Асіеля перетворило її на сирену.", en: "Asiel's curse turned her into a siren." }
-        }
-    }
+    { id: 1, name: { uk: "Стенлі Акуловбивця", en: "Stanley Sharkslayer" }, img: "assets/stanley.png", stats: { age: "42", race: "Людина", activity: "Капітан", bio: "Шукає помсти." } },
+    { id: 2, name: { uk: "Русалка (Міра)", en: "Mermaid (Mira)" }, img: "assets/mermaid.png", stats: { age: "???", race: "Сирена", activity: "Торговець", bio: "Проклята Асіелем." } },
+    { id: 3, name: { uk: "Елра (Старійшина)", en: "Elra (Elder)" }, img: "assets/elder_woman.png", stats: { age: "80", race: "Людина", activity: "Старійшина села", bio: "Знає секрети Стража Лагуни." } },
+    { id: 4, name: { uk: "Мер Блервуда", en: "Mayor of Blairwood" }, img: "assets/mayor.png", stats: { age: "55", race: "Людина", activity: "Мер міста", bio: "Намагається врятувати дітей Блервуда." } }
 ];

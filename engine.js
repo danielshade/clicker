@@ -8,6 +8,7 @@ let gameTimer, spawnInterval;
 function startGame() {
     const stage = MAP_DATA[gameState.mapId].stages[gameState.stageIdx];
     const settings = DIFFICULTY_SETTINGS[gameState.difficulty];
+    document.getElementById('pauseBtn').classList.remove('hidden');
 
     gameState.active = true;
     gameState.score = 0;
@@ -206,4 +207,28 @@ function endGame(msg) {
     gameState.active = false;
     alert(msg);
     location.reload();
+}
+
+function togglePause() {
+    if (!gameState.active) return;
+    gameState.paused = !gameState.paused;
+    
+    if (gameState.paused) {
+        showPauseMenu();
+    } else {
+        document.getElementById('screen-renderer').classList.add('hidden');
+    }
+}
+
+function showPauseMenu() {
+    const T = TRANSLATIONS[gameState.lang];
+    const renderer = document.getElementById('screen-renderer');
+    renderer.classList.remove('hidden');
+    renderer.innerHTML = `
+        <div class="menu-container pause-overlay">
+            <h2>${T.pause}</h2>
+            <button class="btn-blue" onclick="togglePause()">${T.resume}</button>
+            <button class="btn-blue" style="background:#c0392b" onclick="location.reload()">${T.main_menu}</button>
+        </div>
+    `;
 }
