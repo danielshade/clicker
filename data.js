@@ -9,7 +9,8 @@ const TRANSLATIONS = {
         bestiary: "БЕСТІАРІЙ", back: "НАЗАД", score: "Очки", time: "Час", 
         victory: "ЕТАП ПРОЙДЕНО", next: "ЗАНУРИТИСЬ", finish: "НА ПОВЕРХНЮ", 
         diff: "СКЛАДНІСТЬ", easy: "ЛЕГКО", normal: "НОРМ", jaws: "JAWS", 
-        pearls: "Перлини", loot: "ВАШІ ТРОФЕЇ", goods: "ТОВАРИ", age: "Вік", race: "Раса", activity: "Діяльність", bio: "Біографія",
+        pearls: "Перлини", loot: "ВАШІ ТРОФЕЇ", goods: "ТОВАРИ", age: "Вік", 
+        race: "Раса", activity: "Діяльність", bio: "Біографія",
         unlocked: "Розблоковано", locked: "Заблоковано"
     },
     en: { 
@@ -17,13 +18,13 @@ const TRANSLATIONS = {
         bestiary: "BESTIARY", back: "BACK", score: "Score", time: "Time", 
         victory: "STAGE CLEAR", next: "DIVE DEEPER", finish: "SURFACE", 
         diff: "DIFFICULTY", easy: "EASY", normal: "NORM", jaws: "JAWS", 
-        pearls: "Pearls", loot: "YOUR TROPHIES", goods: "GOODS", age: "Age", race: "Race", activity: "Activity", bio: "Biography",
+        pearls: "Pearls", loot: "YOUR TROPHIES", goods: "GOODS", age: "Age", 
+        race: "Race", activity: "Activity", bio: "Biography",
         unlocked: "Unlocked", locked: "Locked"
-
     }
 };
 
-// --- 2. КАРТИ ТА ЕТАПИ (3 регіони по 3 рівні) ---
+// --- 2. КАРТИ ТА ЕТАПИ (5 регіонів) ---
 const MAP_DATA = [
     { 
         id: 0, name: "Узбережжя Короля", 
@@ -50,18 +51,24 @@ const MAP_DATA = [
         ]
     },
     { 
-    id: 3, name: "Лихо у Тумані", 
-    stages: [
-        { id: 1, name: "Болото", bg: "assets/swamp_bg.png", enemies: ['snake.png', 'bat.png'], boss: null },
-        { id: 2, name: "Довга Ріка", bg: "assets/long_river_bg.png", enemies: ['crocodile.png'], boss: null },
-        { id: 3, name: "Мертва Лагуна", bg: "assets/dead_lagoon_bg.png", enemies: [], boss: "giant_turtle.png" }
-    ]
-},
-
-    
+        id: 3, name: "Лихо у Тумані", 
+        stages: [
+            { id: 1, name: "Болото", bg: "assets/swamp_bg.png", enemies: ['snake.png', 'bat.png'], boss: null },
+            { id: 2, name: "Довга Ріка", bg: "assets/long_river_bg.png", enemies: ['crocodile.png'], boss: null },
+            { id: 3, name: "Мертва Лагуна", bg: "assets/dead_lagoon_bg.png", enemies: [], boss: "giant_turtle.png" }
+        ]
+    },
+    { 
+        id: 4, name: "Місто Спогадів", 
+        stages: [
+            { id: 1, name: "Місто Блервуд", bg: "assets/city_bg.png", enemies: ['wolf.png', 'bear.png'], boss: null },
+            { id: 2, name: "Порт", bg: "assets/port_bg.png", enemies: ['fishman.png'], boss: null },
+            { id: 3, name: "Лик Моря", bg: "assets/face_of_sea_bg.png", enemies: [], boss: "sea_serpent.png" }
+        ]
+    }
 ];
 
-// --- КАТЕГОРІЇ БЕСТІАРІЮ ---
+// --- 3. БЕСТІАРІЙ ---
 const BESTIARY_CATEGORIES = {
     mobs: { uk: "ПРОСТІ МОБИ", en: "SIMPLE MOBS" },
     myth: { uk: "МІФОЛОГІЧНІ ІСТОТИ", en: "MYTHOLOGICAL CREATURES" },
@@ -69,24 +76,27 @@ const BESTIARY_CATEGORIES = {
 };
 
 const BESTIARY_DATA = [
-    // ПРОСТІ МОБИ
+    // ПРОСТІ МОБИ (Mobs)
     { id: 'shark', category: 'mobs', name: "Акули", img: "assets/shark_1.png", desc: "Звичайні хижаки, що відчувають кров за милі." },
     { id: 'eel', category: 'mobs', name: "Мурена", img: "assets/moray_eel.png", desc: "Ховається в щілинах, атакує блискавично." },
     { id: 'octopus', category: 'mobs', name: "Восьминіг", img: "assets/octopus.png", desc: "Розумний мисливець з вісьмома щупальцями." },
     { id: 'ray', category: 'mobs', name: "Скат", img: "assets/stingray.png", desc: "Плаский вбивця, що маскується на дні." },
+    { id: 'snake', category: 'mobs', name: "Болотяна змія", img: "assets/snake.png", desc: "Тихий вбивця, що ховається у рясці боліт." },
+    { id: 'bat', category: 'mobs', name: "Кажани", img: "assets/bat.png", desc: "Зграї кровосісь, що атакують з туману." },
+    { id: 'croc', category: 'mobs', name: "Крокодил", img: "assets/crocodile.png", desc: "Стародавній хижак річкових глибин Лиха у Тумані." },
+    { id: 'wolf', category: 'mobs', name: "Лісовий вовк", img: "assets/wolf.png", desc: "Дикий звір, що охороняє підступи до Блервуда." },
+    { id: 'bear', category: 'mobs', name: "Бурий ведмідь", img: "assets/bear.png", desc: "Величезна сила, що прокинулася в околицях Міста Спогадів." },
+    { id: 'fishman', category: 'mobs', name: "Риболюди", img: "assets/fishman.png", desc: "Дивний підводний народ, що викрадає дітей у Блервуді." },
 
-    // МІФОЛОГІЧНІ ІСТОТИ
+    // МІФОЛОГІЧНІ ІСТОТИ (Myth)
     { id: 'mermaid', category: 'myth', name: "Зла Русалка", img: "assets/evil_mermaid.png", desc: "Сирена, чий спів веде до загибелі на рифах." },
     { id: 'kraken', category: 'myth', name: "Кракен", img: "assets/kraken.png", desc: "Древній жах, здатний поглинути цілий флот." },
+    { id: 'turtle', category: 'myth', name: "Гігантська черепаха", img: "assets/giant_turtle.png", desc: "Проклятий страж Лагуни, чий панцир міцніший за сталь." },
+    { id: 'sea_serpent', category: 'myth', name: "Морський Змій", img: "assets/sea_serpent.png", desc: "Древній володар Лику Моря, чиє тіло обвиває Блервуд." },
 
-    // КРИПТИДИ
+    // КРИПТИДИ (Cryptids)
     { id: 'megalodon', category: 'cryptids', name: "Мегалодон", img: "assets/megalodon.png", desc: "Доісторичний хижак, що вважався вимерлим мільйони років." },
-    { id: 'unknown', category: 'cryptids', name: "???", img: "assets/ui_bg.png", desc: "У цих водах бачили щось набагато більше за Мегалодона. Попереду нові зустрічі..." },
-
-    { id: 'snake', category: 'mobs', name: "Болотяна змія", img: "assets/snake.png", desc: "Тихий вбивця, що ховається у рясці." },
-    { id: 'bat', category: 'mobs', name: "Кажани-кровосісі", img: "assets/bat.png", desc: "Зграї, що атакують з туману." },
-    { id: 'croc', category: 'mobs', name: "Крокодил", img: "assets/crocodile.png", desc: "Стародавній хижак річкових глибин." },
-    { id: 'turtle', category: 'myth', name: "Гігантська зла черепаха", img: "assets/giant_turtle.png", desc: "Проклятий страж Лагуни, чий панцир міцніший за сталь." },
+    { id: 'unknown', category: 'cryptids', name: "???", img: "assets/ui_bg.png", desc: "Безодня ще не відкрила всіх своїх таємниць..." }
 ];
 
 // --- 4. СКЛАДНІСТЬ ---
@@ -96,112 +106,95 @@ const DIFFICULTY_SETTINGS = {
     jaws:   { points: 0.5, time: 30, speed: 8 }
 };
 
-// --- 5. ЛЕГЕНДАРНІ ПРЕДМЕТИ (Трофеї з босів) ---
+// --- 5. ЛЕГЕНДАРНІ ПРЕДМЕТИ ---
 const LEGENDARY_ITEMS = {
-    'tooth':    { name: "Зуб Мегалодона", price: 10, img: "assets/megalodon_tooth.png" },
+    'tooth': { name: "Зуб Мегалодона", price: 10, img: "assets/megalodon_tooth.png" },
     'tentacle': { name: "Щупальце Кракена", price: 10, img: "assets/kraken_tentacle.png" },
-    'tongue':   { name: "Язик Сирени", price: 10, img: "assets/siren_tongue.png" },
+    'tongue': { name: "Язик Сирени", price: 10, img: "assets/siren_tongue.png" },
     'shell': { name: "Шматок панцира", price: 10, img: "assets/turtle_shell.png" },
+    'god_verdict': { name: "Божий Вирок", price: 50, img: "assets/god_verdict.png" }
 };
 
-// --- 6. ТОВАРИ У КРАМНИЦІ ---
+// --- 6. КРАМНИЦЯ ---
 const SHOP_ITEMS = [
-    { id: 'scroll_about', name: "Свиток про...", price: 20, desc: "Відкриває таємні знання (вибір всередині)" },
-    { id: 'cool_weapon', name: "Майбутня зброя", price: 999, desc: "Незабаром у продажу..." }
+    { id: 'machete', name: "Мачета", price: 100, desc: "Вбиває кількох ворогів за раз" },
+    { id: 'scroll_about', name: "Свиток про...", price: 20, desc: "Таємні знання та легенди світу" }
 ];
 
-// --- 7. ПРОГРЕС ТА СТАН ГРИ ---
+// --- 7. ПРОГРЕС ---
 let playerProgress = JSON.parse(localStorage.getItem('agony_save')) || {
     pearls: 0,
-    inventory: [],          // Список ключів легендарних предметів (напр. ['tooth'])
-    shopUnlocked: false,    // Відкривається після Кракена на Normal
-    unlockedChars: [1]      // ID доступних персонажів
+    inventory: [],
+    shopUnlocked: false,
+    completedMaps: [],
+    boughtWeapons: ['none'],
+    unlockedChars: [1]
 };
 
 let gameState = {
-    lang: 'uk', 
-    active: false, 
-    paused: false, 
-    score: 0, 
-    hp: 10, 
-    killCount: 0, 
-    mapId: 0, 
-    stageIdx: 0, 
-    difficulty: 'easy', 
-    timeLeft: 60, 
-    bossActive: false, 
-    invul: false
+    lang: 'uk', active: false, paused: false, score: 0, hp: 10, 
+    killCount: 0, mapId: 0, stageIdx: 0, difficulty: 'easy', 
+    timeLeft: 60, bossActive: false, invul: false, weapon: 'none'
 };
 
-// Функція збереження
 function saveGame() {
     localStorage.setItem('agony_save', JSON.stringify(playerProgress));
 }
 
-// --- ЛЕГЕНДИ ТА ЛОР ---
+// --- 8. ЛЕГЕНДИ ТА ЛОР (ВИПРАВЛЕНО СТРУКТУРУ) ---
 const LEGENDS_TEXT = {
     uk: {
         oceans_curse: {
             title: "ПРОКЛЯТТЯ СОЛОНОЇ КРОВІ",
-            text: `Колись океани були колискою життя, солодкими та чистими. Але в епоху Чорного Сонця, коли стародавні боги відвернулися від світу, відбувся Катаклізм. 
-            
-            Кажуть, що кров першого вампіра Асіеля потрапила в безодню, отруївши кожну краплю. Вода стала солоною від сліз потопельників і гіркою від прокляття безсмертя. 
-            
-            Відтоді океан — це не просто вода, а жива тюрма. Кожна акула, кожен вугор — це лише інструмент агонії, що карає тих, хто насмілився порушити спокій проклятих глибин. Безодня не просто топить, вона п'є твою душу.`
+            text: "Колись океани були чистими... Кажуть, кров першого вампіра Асіеля отруїла безодню. Вода стала солоною від сліз потопельників."
+        },
+        guardian_legend: {
+            title: "ПРОКЛЯТИЙ СТРАЖ ЛАГУНИ",
+            text: "Ця черепаха була священною, доки туман не отруїв її розум. Тепер вона стереже Мертву Лагуну."
+        },
+        god_abyss: {
+            title: "БОГ БЕЗОДНІ",
+            text: "Він спостерігає з глибини. Те, що ми вважали штормами — лише його дихання. Божий Вирок тепер у ваших руках."
         }
     },
     en: {
         oceans_curse: {
             title: "THE CURSE OF SALT BLOOD",
-            text: `Once, the oceans were the cradle of life, sweet and clear. But during the era of the Black Sun, when the ancient gods turned away, the Cataclysm occurred. 
-            
-            They say the blood of the first vampire, Asiel, fell into the abyss, poisoning every drop. The water became salty from the tears of the drowned and bitter from the curse of immortality. 
-            
-            Since then, the ocean is not just water, but a living prison. Every shark, every eel is merely an instrument of agony, punishing those who dare to disturb the peace of the cursed depths.`
+            text: "Once the oceans were pure... They say the blood of the first vampire, Asiel, poisoned the abyss."
+        },
+        guardian_legend: {
+            title: "CURSED GUARDIAN OF THE LAGOON",
+            text: "This turtle was sacred until the mist poisoned its mind. Now it guards the Dead Lagoon."
+        },
+        god_abyss: {
+            title: "GOD OF THE ABYSS",
+            text: "He watches from the depths. What we thought were storms is only his breath."
         }
-    },
-
-    guardian_legend: {
-    uk: {
-        title: "ПРОКЛЯТИЙ СТРАЖ ЛАГУНИ",
-        text: "Кажуть, ця черепаха була священною істотою, доки туман не отруїв її розум. Тепер вона стереже Мертву Лагуну, не пускаючи нікого до витоків річки."
-    },
-    en: {
-        title: "CURSED GUARDIAN OF THE LAGOON",
-        text: "They say this turtle was a sacred creature until the mist poisoned its mind. Now it guards the Dead Lagoon, letting no one near the river's source."
     }
-}
 };
 
+// --- 9. ГЕРОЇ ---
 const CHARACTER_DATA = [
     { 
         id: 1, 
         name: { uk: "Стенлі Акуловбивця", en: "Stanley Sharkslayer" }, 
-        img: "assets/stanley.png", 
-        unlocked: true,
+        img: "assets/stanley.png", unlocked: true,
         stats: {
             age: { uk: "42 роки", en: "42 years" },
             race: { uk: "Людина", en: "Human" },
             activity: { uk: "Капітан / Мисливець", en: "Captain / Hunter" },
-            bio: { 
-                uk: "Втратив свою сім'ю під час атаки великої білої акули. Тепер він присвятив життя очищенню проклятих океанів від морських чудовиськ.",
-                en: "Lost his family during a Great White attack. Now he dedicated his life to purging the cursed oceans of sea monsters."
-            }
+            bio: { uk: "Втратив сім'ю під час атаки акули. Присвятив життя помсті.", en: "Lost family to a shark attack. Dedicated life to revenge." }
         }
     },
     { 
         id: 2, 
         name: { uk: "Русалка (Міра)", en: "Mermaid (Mira)" }, 
-        img: "assets/mermaid.png", 
-        unlocked: false, // Відкривається після купівлі в крамниці
+        img: "assets/mermaid.png", unlocked: false,
         stats: {
-            age: { uk: "Невідомо (безсмертна)", en: "Unknown (immortal)" },
+            age: { uk: "Невідомо", en: "Unknown" },
             race: { uk: "Сирена безодні", en: "Abyss Siren" },
-            activity: { uk: "Хранителька секретів / Торговець", en: "Keeper of Secrets / Merchant" },
-            bio: { 
-                uk: "Колись була звичайною дівчиною, але прокляття Асіеля перетворило її на сирену. Вона допомагає Стенлі за перлини, сподіваючись викупити свою свободу.",
-                en: "Once a normal girl, but Asiel's curse turned her into a siren. She helps Stanley for pearls, hoping to buy her freedom."
-            }
+            activity: { uk: "Торговець", en: "Merchant" },
+            bio: { uk: "Прокляття Асіеля перетворило її на сирену.", en: "Asiel's curse turned her into a siren." }
         }
     }
 ];

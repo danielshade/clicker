@@ -1,5 +1,5 @@
 /**
- * ENGINE.JS - Основна логіка гри та система трофеїв
+ * ENGINE.JS - Оптимізована логіка: зброя, боси та система трофеїв
  */
 
 let gameTimer, spawnInterval;
@@ -16,12 +16,11 @@ function startGame() {
     gameState.timeLeft = settings.time;
     gameState.bossActive = false;
 
-    // Візуал
     document.getElementById('gameContainer').style.backgroundImage = `url('${stage.bg}')`;
     document.getElementById('screen-renderer').classList.add('hidden');
     document.getElementById('hud').classList.remove('hidden');
     document.getElementById('playerHealthDisplay').classList.remove('hidden');
-    
+
     updateUI();
     startLoops();
 }
@@ -30,7 +29,6 @@ function startLoops() {
     clearInterval(gameTimer);
     clearInterval(spawnInterval);
 
-    // Таймер зворотного відліку
     gameTimer = setInterval(() => {
         if (!gameState.active || gameState.paused) return;
         gameState.timeLeft--;
@@ -38,7 +36,6 @@ function startLoops() {
         if (gameState.timeLeft <= 0) endGame("Час вийшов! Безодня забрала вас.");
     }, 1000);
 
-    // Спавн ворогів або боса
     spawnInterval = setInterval(() => {
         const stage = MAP_DATA[gameState.mapId].stages[gameState.stageIdx];
         if (!gameState.active || gameState.paused || gameState.bossActive) return;
@@ -55,72 +52,91 @@ function startLoops() {
 function createEnemy() {
     const container = document.getElementById('gameContainer');
     const stage = MAP_DATA[gameState.mapId].stages[gameState.stageIdx];
-    const settings = DIFFICULTY_SETTINGS[gameState.difficulty];
     
     const enemy = document.createElement('img');
     enemy.src = `assets/${stage.enemies[Math.floor(Math.random() * stage.enemies.length)]}`;
     enemy.className = 'target';
-    
+
     const fromLeft = Math.random() > 0.5;
     enemy.style.top = Math.random() * (window.innerHeight - 250) + 100 + 'px';
     let pos = fromLeft ? -150 : window.innerWidth + 50;
     enemy.style.left = pos + 'px';
-    if (!fromLeft) enemy.style.transform = "scaleX(-1)"; 
+    if (!fromLeft) enemy.style.transform = "scaleX(-1)";
 
+    // ОБ'ЄДНАНА ЛОГІКА КЛІКУ (Вбивство + Бос + Мачета)
     enemy.onclick = (e) => {
         e.stopPropagation();
-        gameState.score += settings.points;
-        gameState.killCount++;
-        enemy.classList.add('dying');
-        updateUI();
-        
-        // Поява боса (після 10 вбитих на 3-му етапі)
+        if (!gameState.active || gameState.paused) return;
+
+        // 1. Вбиваємо основну ціль
+        killEnemy(enemy);
+
+        // 2. Логіка Мачети (Мульти-вбивство)
+        if (gameState.weapon === 'machete') {
+            const targets = Array.from(document.querySelectorAll('.target:not(.dying):not(.boss-img)'));
+            const multiKillLimit = (gameState.difficulty === 'jaws') ? 1 : 2; 
+            
+            for (let i = 0; i < multiKillLimit; i++) {
+                if (targets[i]) killEnemy(targets[i]);
+            }
+        }
+
+        // 3. Перевірка появи боса
         if (stage.boss && gameState.killCount >= 10 && !gameState.bossActive) {
             spawnBoss(stage.boss);
         }
 
-        setTimeout(() => enemy.remove(), 400);
+        // 4. Перевірка перемоги
         if (gameState.score >= 40 && !gameState.bossActive) winStage();
     };
 
     container.appendChild(enemy);
-    
+
     let moveInt = setInterval(() => {
         if (!gameState.active || gameState.paused) return;
         if (!enemy.parentElement) return clearInterval(moveInt);
-        
-        pos += fromLeft ? settings.speed : -settings.speed;
+
+        pos += fromLeft ? DIFFICULTY_SETTINGS[gameState.difficulty].speed : -DIFFICULTY_SETTINGS[gameState.difficulty].speed;
         enemy.style.left = pos + 'px';
 
         if ((fromLeft && pos > window.innerWidth) || (!fromLeft && pos < -200)) {
-            enemy.remove(); 
-            takeDamage(); 
+            enemy.remove();
+            takeDamage();
             clearInterval(moveInt);
         }
     }, 20);
 }
 
+function killEnemy(el) {
+    const settings = DIFFICULTY_SETTINGS[gameState.difficulty];
+    gameState.score += settings.points;
+    gameState.killCount++;
+    el.classList.add('dying');
+    updateUI();
+    setTimeout(() => el.remove(), 400);
+}
+
 function spawnBoss(bossImg) {
     if (gameState.bossActive) return;
     gameState.bossActive = true;
-    
+
     const container = document.getElementById('gameContainer');
     const boss = document.createElement('img');
     boss.src = `assets/${bossImg}`;
     boss.className = 'target boss-img';
-    boss.style.left = '50%'; 
-    boss.style.top = '30%'; 
+    boss.style.left = '50%';
+    boss.style.top = '30%';
     boss.style.transform = 'translateX(-50%)';
-    
+
     let bossHp = 25;
     boss.onclick = () => {
         bossHp--;
         boss.style.filter = "brightness(2) red";
         setTimeout(() => boss.style.filter = "", 100);
-        
+
         if (bossHp <= 0) {
-            boss.remove(); 
-            gameState.bossActive = false; 
+            boss.remove();
+            gameState.bossActive = false;
             winStage();
         }
     };
@@ -134,9 +150,9 @@ function takeDamage() {
     updateUI();
     gameState.invul = true;
     document.getElementById('gameContainer').style.boxShadow = "inset 0 0 100px red";
-    setTimeout(() => { 
-        gameState.invul = false; 
-        document.getElementById('gameContainer').style.boxShadow = ""; 
+    setTimeout(() => {
+        gameState.invul = false;
+        document.getElementById('gameContainer').style.boxShadow = "";
     }, 1000);
 
     if (gameState.hp <= 0) endGame("Ваш човен розтрощено! Гру закінчено.");
@@ -145,13 +161,13 @@ function takeDamage() {
 function updateUI() {
     const T = TRANSLATIONS[gameState.lang];
     const stage = MAP_DATA[gameState.mapId].stages[gameState.stageIdx];
-    
+
     document.getElementById('hud-map-name').textContent = stage.name;
     document.getElementById('scoreDisplay').textContent = `${T.score}: ${Math.floor(gameState.score)} / 40`;
     document.getElementById('heart-container').textContent = '❤️'.repeat(gameState.hp);
 }
 
-// --- 4. ПЕРЕМОГА ТА ЛУТ ---
+// --- 4. ПЕРЕМОГА ТА ЛУТ (Очищено) ---
 function winStage() {
     gameState.active = false;
     clearInterval(gameTimer);
@@ -159,19 +175,24 @@ function winStage() {
 
     const stage = MAP_DATA[gameState.mapId].stages[gameState.stageIdx];
 
-    if (stage.boss) {
+    // Логіка лише для фінального рівня мапи (боса)
+    if (gameState.stageIdx === 2) { 
+        // Позначаємо мапу як пройдену
+        if (!playerProgress.completedMaps.includes(gameState.mapId)) {
+            playerProgress.completedMaps.push(gameState.mapId);
+        }
+
+        // Видача легендарного луту за мапами
         let lootKey = null;
-        if (gameState.mapId === 0) lootKey = 'tooth';
-        if (gameState.mapId === 1) lootKey = 'tentacle';
-        if (gameState.mapId === 2) lootKey = 'tongue';
-        if (gameState.mapId === 3) lootKey = 'shell'; // НОВИЙ ТРОФЕЙ
+        const loots = ['tooth', 'tentacle', 'tongue', 'shell', 'god_verdict'];
+        lootKey = loots[gameState.mapId];
 
         if (lootKey) {
             playerProgress.inventory.push(lootKey);
             alert(`${gameState.lang === 'uk' ? 'Отримано:' : 'Obtained:'} ${LEGENDARY_ITEMS[lootKey].name}`);
         }
-        
-        // Перевірка на Кракена (залишається як була)
+
+        // Умова розблокування крамниці (Кракен на Normal)
         if (gameState.mapId === 1 && gameState.difficulty === 'normal') {
             playerProgress.shopUnlocked = true;
         }
@@ -182,7 +203,7 @@ function winStage() {
 }
 
 function endGame(msg) {
-    gameState.active = false; 
-    alert(msg); 
+    gameState.active = false;
+    alert(msg);
     location.reload();
 }
