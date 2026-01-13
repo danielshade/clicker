@@ -5,18 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Водяна Агонія: Шлях Додому</title>
     <style>
-        /* --- 1. ГЛОБАЛЬНІ СТИЛІ --- */
+        /* --- 1. ГЛОБАЛЬНІ ЗМІННІ ТА ОСНОВА --- */
         :root { 
             --gold: #ffd700; 
             --deep-blue: rgba(0, 15, 35, 0.95); 
             --red: #ff4444; 
             --green: #2ecc71;
+            --purple: #8e44ad;
         }
 
         body, html { 
             margin: 0; padding: 0; width: 100%; height: 100%; 
             overflow: hidden; background: #000; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white; 
+            font-family: 'Segoe UI', 'Georgia', serif; color: white; 
+        }
+
+        /* Повносторінковий фон меню (Фішка 6.2) */
+        body.menu-active {
+            background: url('assets/main_menu_full_bg.png') no-repeat center center fixed;
+            background-size: cover;
         }
 
         #gameContainer { 
@@ -25,7 +32,7 @@
             background-position: center; transition: background 0.8s ease; 
         }
 
-        /* --- 2. HUD (ГЕЙМПЛЕЙНИЙ ІНТЕРФЕЙС) --- */
+        /* --- 2. ГЕЙМПЛЕЙНИЙ ІНТЕРФЕЙС (HUD) --- */
         #hud { 
             position: absolute; top: 20px; width: 100%; 
             display: flex; justify-content: center; gap: 20px; 
@@ -46,24 +53,29 @@
             box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
         }
 
-        /* --- 3. UI ТА МЕНЮ --- */
+        /* Сірі серця (Фішка 6.2) */
+        .heart-lost { filter: grayscale(1); opacity: 0.4; transition: 0.3s; }
+
+        /* --- 3. UI ТА МЕНЮ РЕНДЕРЕР --- */
         #screen-renderer { 
             position: absolute; inset: 0; z-index: 100; 
             display: flex; align-items: center; justify-content: center; 
+            background: rgba(0,0,0,0.3);
         }
 
         .menu-container { 
             background: var(--deep-blue); 
             background-image: linear-gradient(rgba(0,15,35,0.85), rgba(0,15,35,0.85)), url('assets/ui_bg.png');
-            background-size: cover; background-position: center;
-            padding: 40px; border: 3px solid var(--gold); border-radius: 25px; 
-            box-shadow: 0 0 50px rgba(255, 215, 0, 0.3); text-align: center; 
-            width: 450px; position: relative;
+            background-size: cover; padding: 40px; 
+            border: 3px solid var(--gold); border-radius: 25px; 
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.4); text-align: center; 
+            width: 480px; position: relative;
         }
 
         .game-title { 
-            color: var(--gold); font-size: 42px; margin-bottom: 10px; 
+            color: var(--gold); font-size: 42px; margin-bottom: 20px; 
             text-shadow: 0 0 15px var(--gold); letter-spacing: 2px;
+            font-weight: 900;
         }
 
         .button-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
@@ -72,178 +84,102 @@
             background: linear-gradient(145deg, #0044cc, #002266); 
             color: white; border: 1px solid var(--gold); 
             padding: 15px; font-size: 16px; font-weight: bold;
-            cursor: pointer; border-radius: 10px; transition: 0.3s;
+            cursor: pointer; border-radius: 12px; transition: 0.2s;
         }
 
         .btn-blue:hover { transform: scale(1.05); filter: brightness(1.2); box-shadow: 0 0 15px var(--gold); }
 
+        /* Красива кнопка мови (Фішка 6.2) */
         .lang-switch { 
-            position: absolute; top: 15px; right: 15px; 
-            background: rgba(0,0,0,0.5); border: 1px solid var(--gold); 
-            color: var(--gold); padding: 5px 10px; cursor: pointer; border-radius: 5px; 
+            position: absolute; top: 20px; left: 20px; 
+            background: rgba(0,0,0,0.7); border: 2px solid var(--gold); 
+            color: white; padding: 8px 15px; cursor: pointer; border-radius: 20px; 
+            font-weight: bold; transition: 0.3s;
         }
+        .lang-switch:hover { background: var(--gold); color: black; }
 
         /* --- 4. КРАМНИЦЯ ТА СПИСКИ --- */
-        .shop-bg { 
-            border-color: var(--green) !important; 
-            box-shadow: 0 0 50px rgba(46, 204, 113, 0.3) !important;
-        }
-
-        .mermaid-seller { margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
+        .shop-bg { border-color: var(--green) !important; box-shadow: 0 0 50px rgba(46, 204, 113, 0.4) !important; }
+        .sand-text { color: var(--purple); font-weight: bold; }
 
         .scroll-list { 
-            max-height: 250px; overflow-y: auto; 
+            max-height: 300px; overflow-y: auto; 
             margin: 20px 0; padding-right: 10px; 
         }
 
         .list-item { 
             background: rgba(255,255,255,0.05); border: 1px solid var(--gold); 
-            border-radius: 8px; padding: 12px; margin-bottom: 10px; text-align: left; 
+            border-radius: 10px; padding: 12px; margin-bottom: 10px; text-align: left;
+            position: relative;
         }
 
         .btn-small {
-            background: #f1c40f; border: none; padding: 6px 12px; 
-            border-radius: 4px; cursor: pointer; font-weight: bold; color: #000;
+            background: var(--gold); border: none; padding: 6px 14px; 
+            border-radius: 6px; cursor: pointer; font-weight: bold; color: #000;
         }
 
+        /* --- 5. АНІМАЦІЇ ТА СПЕЦЕФЕКТИ --- */
         @keyframes spin-clock {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
 
-    .gacha-spinner {
-        font-size: 80px;
-        display: inline-block;
-        animation: spin-clock 0.8s linear infinite;
-        margin: 20px 0;
-    }
+        .gacha-spinner { font-size: 80px; display: inline-block; animation: spin-clock 1s linear infinite; }
 
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, -20px); }
+            15% { opacity: 1; transform: translate(-50%, 0); }
+            85% { opacity: 1; transform: translate(-50%, 0); }
+            100% { opacity: 0; transform: translate(-50%, -20px); }
+        }
+
+        .scp-achievement {
+            position: fixed; top: 15%; left: 50%; transform: translateX(-50%);
+            background: rgba(255, 0, 0, 0.3); border: 2px solid red;
+            color: white; padding: 15px 30px; border-radius: 8px;
+            font-weight: bold; letter-spacing: 3px; z-index: 1000;
+            box-shadow: 0 0 30px red; pointer-events: none;
+            animation: fadeInOut 4s forwards;
+            text-align: center;
+        }
+
+        /* --- 6. ПЕРСОНАЖІ ТА БЕСТІАРІЙ --- */
+        .char-card { position: relative; background: rgba(0, 20, 40, 0.8) !important; border: 2px solid var(--gold) !important; }
+        .locked-char { filter: grayscale(1) brightness(0.4); pointer-events: none; }
+        .lock-overlay { 
+            position: absolute; inset: 0; display: flex; align-items: center; 
+            justify-content: center; font-size: 32px; color: white; background: rgba(0,0,0,0.5); 
+            font-weight: bold; text-shadow: 0 0 10px black; border-radius: 10px;
+        }
+
+        .category-header { 
+            color: var(--gold); border-left: 4px solid var(--gold); 
+            padding-left: 10px; margin: 25px 0 10px 0; font-size: 18px; 
+            background: rgba(255, 215, 0, 0.1); 
+        }
+
+        /* --- 7. ІГРОВІ ОБ'ЄКТИ --- */
         #pauseBtn {
-        position: absolute; top: 20px; right: 20px;
-        z-index: 95; background: rgba(0,0,0,0.6);
-        border: 2px solid var(--gold); color: var(--gold);
-        padding: 10px; cursor: pointer; border-radius: 50%;
-        width: 50px; height: 50px; font-weight: bold;
-    }
+            position: absolute; top: 20px; right: 20px; z-index: 95; 
+            background: rgba(0,0,0,0.6); border: 2px solid var(--gold); color: var(--gold);
+            padding: 10px; cursor: pointer; border-radius: 50%; width: 50px; height: 50px; font-weight: bold;
+        }
 
-    /* Екран Паузи */
-    .pause-overlay {
-        background: rgba(0,0,0,0.8);
-        display: flex; flex-direction: column; gap: 20px;
-    }
-
-    /* Фон Головного Меню */
-    .main-menu-bg {
-        background-image: linear-gradient(rgba(0,10,20,0.6), rgba(0,10,20,0.6)), url('assets/main_menu_bg.png') !important;
-        background-size: cover;
-    }
-
-    .sand-text { color: #8e44ad; font-weight: bold; }
-
-        /* Заголовки категорій у бестіарії */
-.category-header {
-    color: var(--gold);
-    border-left: 4px solid var(--gold);
-    padding-left: 10px;
-    margin: 20px 0 10px 0;
-    text-align: left;
-    font-size: 18px;
-    background: rgba(255, 215, 0, 0.1);
-}
-
-/* Картка персонажа */
-.char-card {
-    position: relative;
-    background: rgba(0, 20, 40, 0.8) !important;
-    border: 2px solid var(--gold) !important;
-    margin-bottom: 20px;
-    padding: 20px;
-}
-
-.char-card p {
-    margin: 5px 0;
-}
-
-.char-card b {
-    color: var(--gold);
-}
-
-/* Стиль для заблокованого героя */
-.locked-char {
-    filter: grayscale(1) brightness(0.5);
-    pointer-events: none;
-}
-
-.lock-overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    color: white;
-    background: rgba(0,0,0,0.4);
-    font-weight: bold;
-    text-shadow: 0 0 10px black;
-}
-
-/* Спеціальний стиль для картки в бестіарії */
-.bestiary-card {
-    display: flex;
-    align-items: center;
-    border-left: 2px solid transparent;
-    transition: 0.3s;
-}
-
-.bestiary-card:hover {
-    background: rgba(255, 215, 0, 0.1);
-    border-left: 2px solid var(--gold);
-    transform: translateX(5px);
-}
-
-/* Колір для криптидів */
-.category-header:nth-of-type(3) {
-    color: #ff4444;
-    border-left-color: #ff4444;
-    background: rgba(255, 68, 68, 0.1);
-}
-
-        /* Стилізація скролбару */
-        .scroll-list::-webkit-scrollbar { width: 6px; }
-        .scroll-list::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
-        .scroll-list::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
-
-        /* --- 5. ІГРОВІ ОБ'ЄКТИ --- */
-        .target { position: absolute; width: 130px; cursor: crosshair; z-index: 50; }
-        .boss-img { width: 350px !important; z-index: 90; filter: drop-shadow(0 0 20px red); }
-        .dying { transform: scale(0); opacity: 0; transition: 0.4s; pointer-events: none; }
+        .target { position: absolute; width: 140px; cursor: crosshair; z-index: 50; }
+        .boss-img { width: 380px !important; z-index: 90; filter: drop-shadow(0 0 25px red); }
+        .dying { transform: scale(0) rotate(180deg); opacity: 0; transition: 0.5s; pointer-events: none; }
         .hidden { display: none !important; }
 
-        /* --- АНІМАЦІЇ --- */
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-12px); }
-        }
-
-        /* Стиль для легендарного сувою */
-         .scroll-visual {
-    background-image: linear-gradient(rgba(40, 30, 10, 0.9), rgba(20, 15, 5, 0.95)), url('assets/ui_bg.png') !important;
-    border-color: #c4a484 !important; /* Колір старого паперу */
-    box-shadow: 0 0 30px rgba(196, 164, 132, 0.5) !important;
-}
-
-.scroll-visual h2 {
-    font-family: 'Georgia', serif;
-    letter-spacing: 1px;
-    color: #f3e5ab !important; /* Кремовий колір тексту */
-}
-
+        .scroll-list::-webkit-scrollbar { width: 8px; }
+        .scroll-list::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+        .scroll-list::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
     </style>
 </head>
 <body>
 
     <div id="gameContainer">
         <button id="pauseBtn" class="hidden" onclick="togglePause()">II</button>
+
         <div id="hud" class="hidden">
             <div class="hud-item" id="hud-map-name"></div>
             <div class="hud-item" id="scoreDisplay"></div>
